@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>試合記録アプリ</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    section { margin-bottom: 3em; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: center; }
+    th { background: #f0f0f0; }
+    textarea, input { margin: 0.2em; }
+  </style>
+</head>
+<body>
+
+  <!-- ログインセクション -->
+  <section id="loginSection">
+    <h2>ログイン</h2>
+    <label>ユーザーID：<input type="number" id="loginUserId"></label>
+    <label>パスワード：<input type="password" id="loginPassword"></label>
+    <button onclick="login()">ログイン</button>
+  </section>
+
+  <section id="loginSection">
+    <h2>ログイン</h2>
+    <label>ユーザーID：<input type="number" id="loginUserId"></label>
+    <label>パスワード：<input type="password" id="loginPassword"></label>
+    <button onclick="login()">ログイン</button>
+  </section>
+  
+  <section id="registerSection">
+    <h2>新規登録</h2>
+    <label>プレイヤー名：<input id="regPlayerName" maxlength="20"></label><br>
+    <label>パスワード（英数字6桁以上）：<input type="password" id="regPassword"></label><br>
+    <label>シークレットID（数字4桁）：<input type="number" id="regSecretId" maxlength="4"></label><br>
+    <button onclick="register()">登録する</button>
+    <div id="registerMessage" style="margin-top: 1em; color: green;"></div>
+  </section>
+
+
+  <!-- メインセクション -->
+  <section id="mainSection" style="display: none;">
+    <h2>ようこそ！</h2>
+    <div id="chatNotice"></div>
+    <button onclick="openMyPage()">マイページ</button>
+    <button onclick="openReport()">通報する</button>
+    <button onclick="openChat()">運営とチャット</button>
+    <button onclick="logout()">ログアウト</button>
+
+    <h3>ランキングフィルター</h3>
+    <label>ルール：
+      <select id="filterRule">
+        <option value="">すべて</option>
+        <option value="ガチエリア">ガチエリア</option>
+        <option value="ガチヤグラ">ガチヤグラ</option>
+        <option value="ガチホコ">ガチホコ</option>
+        <option value="ガチアサリ">ガチアサリ</option>
+      </select>
+    </label>
+    <label>モード：
+      <select id="filterMode">
+        <option value="">すべて</option>
+        <option value="Xマッチ">Xマッチ</option>
+        <option value="チャレンジ">チャレンジ</option>
+        <option value="オープン">オープン</option>
+      </select>
+    </label>
+    <label>ステージ：<input id="filterStage" placeholder="例：スメーシー" /></label>
+    <button onclick="loadRanking()">ランキング更新</button>
+
+    <h3>ランキング</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ユーザー</th><th>武器</th><th>勝率</th><th>試合数</th>
+        </tr>
+      </thead>
+      <tbody id="rankingBody"></tbody>
+    </table>
+  </section>
+
+  <!-- マイページ -->
+  <section id="mypageSection" style="display: none;">
+    <h2>マイページ</h2>
+    <p>ユーザーID：<span id="mypageUserId"></span></p>
+    <p>シークレットID：<span id="mypageSecretId"></span></p>
+    <button onclick="logout()">ログアウト</button>
+    <table>
+      <thead>
+        <tr>
+          <th>日時</th><th>武器</th><th>キル</th><th>アシスト</th><th>デス</th><th>勝敗</th><th>ルール</th><th>モード</th><th>ステージ</th><th>メモ</th><th>タグ</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="matchHistoryBody"></tbody>
+    </table>
+  </section>
+
+  <!-- 他ユーザーのマイページ -->
+  <section id="publicMypageSection" style="display: none;">
+    <h2>ユーザーのマイページ</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>日時</th><th>武器</th><th>キル</th><th>アシスト</th><th>デス</th><th>勝敗</th><th>ルール</th><th>モード</th><th>ステージ</th><th>メモ</th><th>タグ</th>
+        </tr>
+      </thead>
+      <tbody id="publicMatchHistoryBody"></tbody>
+    </table>
+  </section>
+
+  <!-- 試合登録フォーム -->
+  <section id="matchFormSection" style="display: none;">
+    <h2>試合登録</h2>
+    <label>武器名：<input id="weaponInput"></label>
+    <label>キル：<input type="number" id="killsInput"></label>
+    <label>アシスト：<input type="number" id="assistsInput"></label>
+    <label>デス：<input type="number" id="deathsInput"></label>
+    <label>勝敗：
+      <select id="winInput">
+        <option value="true">勝ち</option>
+        <option value="false">負け</option>
+      </select>
+    </label>
+    <label>ルール：<input id="ruleInput"></label>
+    <label>モード：<input id="modeInput"></label>
+    <label>ステージ：<input id="stageInput"></label>
+    <label>メモ：<input id="noteInput"></label>
+    <label>タグ（カンマ区切り）：<input id="tagsInput"></label>
+    <button onclick="submitMatch()">登録</button>
+  </section>
+
+  <!-- 通報フォーム -->
+  <section id="reportSection" style="display: none;">
+    <h2>ユーザーを通報</h2>
+    <label>対象ユーザーID：<input id="reportUserId"></label>
+    <label>理由：<textarea id="reportReason" rows="3" cols="40"></textarea></label>
+    <button onclick="submitReport()">通報する</button>
+  </section>
+
+  <!-- チャット -->
+  <section id="chatSection" style="display: none;">
+    <h2>運営とのチャット</h2>
+    <div id="chatLog" style="border:1px solid #ccc; padding:1em; height:200px; overflow-y:scroll;"></div>
+    <textarea id="chatInput" rows="2" cols="40" placeholder="メッセージを入力..."></textarea>
+    <br>
+    <button onclick="sendChatMessage()">送信</button>
+  </section>
+
+  <!-- 管理者ダッシュボード -->
+  <section id="adminSection" style="display: none;">
+    <h2>管理者ダッシュボード</h2>
+    <label>対象ユーザーID：<input id="adminTargetUserId"></label>
+    <button onclick="loadAdminDashboard()">読み込み</button>
+
+    <h3>試合履歴</h3>
+    <table>
+      <thead>
+        <tr><th>日時</th><th>武器</th><th>勝敗</th><th>ルール</th><th>モード</th><th>ステージ</th></tr>
+      </thead>
+      <tbody id="adminMatchHistory"></tbody>
+    </table>
+
+    <h3>チャット履歴</h3>
+    <div id="adminChatLog" style="border:1px solid #ccc; height:200px; overflow-y:scroll;"></div>
+    <textarea id="adminChatInput" rows="2" cols="40" placeholder="返信メッセージを入力..."></textarea>
+    <br>
+    <button onclick="sendAdminReply()">返信</button>
+
+    <h3>通報履歴</h3>
+    <table>
+      <thead><tr><th>日時</th><th>通報者</th><th>理由</th></tr></thead>
+      <tbody id="adminReportHistory"></tbody>
+    </table>
+
+    <h3>ユーザー制御</h3>
+    <button onclick="banUser()">BANする</button>
+    <button onclick="unbanUser()">BAN解除</button>
+    <button onclick="warnUser()">警告メッセージ送信</button>
+  </section>
+
+  <script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbzKrEw2oQphfKXRqbyafFQd495DhyRDa3ra2Eg4xy8zIjiZpxLvrG5iXS22ti032Gwk/exec';
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function getQueryParam(name) {
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+
+function checkLoginStatus() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  if (userId && secretId) {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("mainSection").style.display = "block";
+    if (isAdmin) document.getElementById("adminSection").style.display = "block";
+  } else {
+    document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+    document.getElementById("loginSection").style.display = "block";
+  }
+}
+
+async function login() {
+  const userId = document.getElementById("loginUserId").value;
+  const password = document.getElementById("loginPassword").value;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "login", userId, password }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const result = await res.json();
+
+  if (result.success) {
+    localStorage.setItem("userId", userId);
+    localStorage.setItem("secretId", result.secretId);
+    localStorage.setItem("isAdmin", result.isAdmin ? "true" : "false");
+    checkLoginStatus();
+    checkUnreadMessages();
+    await loadRanking();
+  } else if (result.banned) {
+    alert("このアカウントはBANされています。");
+  } else {
+    alert("ログイン失敗！");
+  }
+}
+
+function logout() {
+  localStorage.clear();
+  alert("ログアウトしました！");
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.getElementById("loginSection").style.display = "block";
+}
+
+async function register() {
+  const playerNameInput = document.getElementById("regPlayerName");
+  const passwordInput = document.getElementById("regPassword");
+  const secretIdInput = document.getElementById("regSecretId");
+  const messageBox = document.getElementById("registerMessage");
+
+  const playerName = playerNameInput.value.trim();
+  const password = passwordInput.value.trim();
+  const secretId = secretIdInput.value.trim();
+
+  // 入力チェック
+  if (!playerName || password.length < 6 || !/^[0-9]{4}$/.test(secretId)) {
+    messageBox.style.color = "red";
+    messageBox.textContent = "入力内容を確認してください：パスワードは英数字6桁以上、シークレットIDは数字4桁です。";
+    return;
+  }
+
+  // 登録リクエスト送信
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "register",
+        password,
+        playerName,
+        secretId
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const result = await res.json();
+
+    if (result.userId) {
+      // 成功メッセージ表示
+      messageBox.style.color = "green";
+      messageBox.textContent = `登録完了！あなたのユーザーIDは ${result.userId} です`;
+
+      // 入力欄クリア
+      playerNameInput.value = "";
+      passwordInput.value = "";
+      secretIdInput.value = "";
+
+      // 自動ログイン
+      localStorage.setItem("userId", result.userId);
+      localStorage.setItem("secretId", result.secretId);
+      localStorage.setItem("isAdmin", "false");
+
+      checkLoginStatus();
+      loadRanking();
+    } else {
+      messageBox.style.color = "red";
+      messageBox.textContent = "登録に失敗：" + (result.error || "不明なエラー");
+    }
+  } catch (e) {
+    messageBox.style.color = "red";
+    messageBox.textContent = "通信エラーが発生しました：" + e.message;
+  }
+}
+
+async function submitMatch() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+
+  const match = {
+    userId,
+    secretId,
+    weapon: document.getElementById("weaponInput").value,
+    kills: Number(document.getElementById("killsInput").value),
+    assists: Number(document.getElementById("assistsInput").value),
+    deaths: Number(document.getElementById("deathsInput").value),
+    win: document.getElementById("winInput").value === "true",
+    rule: document.getElementById("ruleInput").value,
+    mode: document.getElementById("modeInput").value,
+    stage: document.getElementById("stageInput").value,
+    note: document.getElementById("noteInput").value,
+    tags: document.getElementById("tagsInput").value.split(",").map(t => t.trim()).filter(t => t)
+  };
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "saveMatch", match }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const result = await res.json();
+  alert(result.status === "ok" ? "登録完了！" : "登録失敗：" + (result.error || "不明なエラー"));
+}
+
+async function openMyPage() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getMatches" }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const allMatches = await res.json();
+  const myMatches = allMatches.filter(m => m.userId == userId);
+
+  document.getElementById("mypageUserId").textContent = userId;
+  document.getElementById("mypageSecretId").textContent = secretId;
+
+  const tbody = document.getElementById("matchHistoryBody");
+  tbody.innerHTML = "";
+
+  myMatches.reverse().forEach(match => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(match.timestamp)}</td>
+      <td>${match.weapon}</td>
+      <td>${match.kills}</td>
+      <td>${match.assists}</td>
+      <td>${match.deaths}</td>
+      <td>${match.win ? "勝ち" : "負け"}</td>
+      <td>${match.rule}</td>
+      <td>${match.mode}</td>
+      <td>${match.stage}</td>
+      <td>${match.note || ""}</td>
+      <td>${(match.tags || []).join(", ")}</td>
+      <td><button onclick="deleteMatch('${match.timestamp}')">削除</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.getElementById("mypageSection").style.display = "block";
+}
+
+async function deleteMatch(timestamp) {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+
+  if (!confirm("この試合を削除しますか？")) return;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "deleteMatch", userId, secretId, timestamp }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const result = await res.json();
+  if (result.status === "deleted") {
+    alert("削除しました！");
+    openMyPage();
+  } else {
+    alert("削除に失敗：" + (result.error || "不明なエラー"));
+  }
+}
+async function openPublicMypage(targetUserId) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getMatchesByUser", userId: targetUserId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const result = await res.json();
+  const matches = result.matches || [];
+  const playerName = result.playerName || `ユーザー${targetUserId}`;
+
+  document.querySelector("#publicMypageSection h2").textContent = `${playerName} のマイページ`;
+
+  const tbody = document.getElementById("publicMatchHistoryBody");
+  tbody.innerHTML = "";
+
+  matches.reverse().forEach(match => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(match.timestamp)}</td>
+      <td>${match.weapon}</td>
+      <td>${match.kills}</td>
+      <td>${match.assists}</td>
+      <td>${match.deaths}</td>
+      <td>${match.win ? "勝ち" : "負け"}</td>
+      <td>${match.rule}</td>
+      <td>${match.mode}</td>
+      <td>${match.stage}</td>
+      <td>${match.note || ""}</td>
+      <td>${(match.tags || []).join(", ")}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.getElementById("publicMypageSection").style.display = "block";
+}
+
+async function submitReport() {
+  const reporterId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  const targetUserId = document.getElementById("reportUserId").value;
+  const reason = document.getElementById("reportReason").value;
+
+  if (!reporterId || !secretId || !targetUserId || !reason) {
+    alert("すべての項目を入力してください！");
+    return;
+  }
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "reportUser", reporterId, secretId, targetUserId, reason }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const result = await res.json();
+  if (result.status === "ok") {
+    alert("通報を受け付けました。運営とのチャットを開始します。");
+
+    await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "sendChatMessage",
+        userId: reporterId,
+        secretId,
+        message: `【通報】ユーザーID ${targetUserId} を通報しました：${reason}`
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+    document.getElementById("chatSection").style.display = "block";
+    loadChatLog();
+  } else {
+    alert("通報に失敗：" + (result.error || "不明なエラー"));
+  }
+}
+
+function openReport() {
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.getElementById("reportSection").style.display = "block";
+}
+
+function openChat() {
+  document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+  document.getElementById("chatSection").style.display = "block";
+  loadChatLog();
+}
+
+async function sendChatMessage() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  const message = document.getElementById("chatInput").value.trim();
+  if (!message) return;
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "sendChatMessage",
+      userId,
+      secretId,
+      message
+    }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  document.getElementById("chatInput").value = "";
+  loadChatLog();
+}
+
+async function loadChatLog() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "getChatLog",
+      userId,
+      secretId
+    }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const messages = await res.json();
+  const log = document.getElementById("chatLog");
+  log.innerHTML = "";
+
+  messages.forEach(msg => {
+    const div = document.createElement("div");
+    div.textContent = `[${formatDate(msg.timestamp)}] ${msg.sender === "user" ? "あなた" : "運営"}: ${msg.text}`;
+    log.appendChild(div);
+  });
+
+  log.scrollTop = log.scrollHeight;
+}
+
+async function checkUnreadMessages() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  if (!userId || !secretId) return;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "getUnreadCount",
+      userId,
+      secretId
+    }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  const result = await res.json();
+  if (result.unread > 0) {
+    const badge = document.createElement("span");
+    badge.textContent = `（${result.unread}件の新着メッセージ）`;
+    badge.style.color = "red";
+    document.getElementById("chatNotice").innerHTML = "";
+    document.getElementById("chatNotice").appendChild(badge);
+  }
+}
+
+async function loadRanking() {
+  const rule = document.getElementById("filterRule").value;
+  const mode = document.getElementById("filterMode").value;
+  const stage = document.getElementById("filterStage").value.trim();
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getMatches" }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const allMatches = await res.json();
+
+  const filtered = allMatches.filter(m => {
+    return (!rule || m.rule === rule) &&
+           (!mode || m.mode === mode) &&
+           (!stage || m.stage.includes(stage));
+  });
+
+  const grouped = {};
+  filtered.forEach(m => {
+    const key = `${m.userId}-${m.weapon}`;
+    if (!grouped[key]) {
+      grouped[key] = { userId: m.userId, weapon: m.weapon, win: 0, total: 0 };
+    }
+    grouped[key].total++;
+    if (m.win) grouped[key].win++;
+  });
+
+  const ranking = Object.values(grouped).map(entry => ({
+    ...entry,
+    winRate: (entry.win / entry.total * 100).toFixed(1)
+  })).sort((a, b) => b.winRate - a.winRate);
+
+  const tbody = document.getElementById("rankingBody");
+  tbody.innerHTML = "";
+
+  for (const entry of ranking) {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "getMatchesByUser", userId: entry.userId }),
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await res.json();
+    const playerName = result.playerName || `ユーザー${entry.userId}`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><a href="?user=${entry.userId}">${playerName}</a></td>
+      <td>${entry.weapon}</td>
+      <td>${entry.winRate}%</td>
+      <td>${entry.total}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// 管理者ダッシュボード機能
+async function loadAdminDashboard() {
+  const userId = document.getElementById("adminTargetUserId").value;
+
+  // 試合履歴
+  const matchRes = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getMatchesByUser", userId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const matchData = await matchRes.json();
+  const matchBody = document.getElementById("adminMatchHistory");
+  matchBody.innerHTML = "";
+  matchData.matches.forEach(m => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(m.timestamp)}</td>
+      <td>${m.weapon}</td>
+      <td>${m.win ? "勝ち" : "負け"}</td>
+      <td>${m.rule}</td>
+      <td>${m.mode}</td>
+      <td>${m.stage}</td>
+    `;
+    matchBody.appendChild(tr);
+  });
+
+  // チャット履歴
+    const chatRes = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getChatLogAdmin", userId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const chatData = await chatRes.json();
+  const chatLog = document.getElementById("adminChatLog");
+  chatLog.innerHTML = "";
+  chatData.forEach(msg => {
+    const div = document.createElement("div");
+    div.textContent = `[${formatDate(msg.timestamp)}] ${msg.sender === "user" ? "ユーザー" : "運営"}: ${msg.text}`;
+    chatLog.appendChild(div);
+  });
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  // 通報履歴
+  const reportRes = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getReportsByTarget", userId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const reportData = await reportRes.json();
+  const reportBody = document.getElementById("adminReportHistory");
+  reportBody.innerHTML = "";
+  reportData.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${formatDate(r.timestamp)}</td>
+      <td>${r.reporterId}</td>
+      <td>${r.reason}</td>
+    `;
+    reportBody.appendChild(tr);
+  });
+}
+
+async function sendAdminReply() {
+  const userId = document.getElementById("adminTargetUserId").value;
+  const text = document.getElementById("adminChatInput").value.trim();
+  if (!text) return;
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "sendAdminReply", userId, text }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  document.getElementById("adminChatInput").value = "";
+  loadAdminDashboard();
+}
+
+async function banUser() {
+  const userId = document.getElementById("adminTargetUserId").value;
+  if (!confirm(`ユーザーID ${userId} をBANしますか？`)) return;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "banUser", userId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const result = await res.json();
+  alert(result.status === "ok" ? "BANしました" : "失敗：" + result.error);
+}
+
+async function unbanUser() {
+  const userId = document.getElementById("adminTargetUserId").value;
+  if (!confirm(`ユーザーID ${userId} のBANを解除しますか？`)) return;
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "unbanUser", userId }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const result = await res.json();
+  alert(result.status === "ok" ? "BAN解除しました" : "失敗：" + result.error);
+}
+
+async function warnUser() {
+  const userId = document.getElementById("adminTargetUserId").value;
+  const text = prompt("警告メッセージを入力してください：");
+  if (!text) return;
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "sendAdminReply", userId, text: `【警告】${text}` }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  alert("警告を送信しました");
+  loadAdminDashboard();
+}
+
+function checkLoginStatus() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  if (userId && secretId) {
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("registerSection").style.display = "none";
+    document.getElementById("mainSection").style.display = "block";
+    if (isAdmin) document.getElementById("adminSection").style.display = "block";
+  } else {
+    document.querySelectorAll("section").forEach(sec => sec.style.display = "none");
+    document.getElementById("loginSection").style.display = "block";
+    document.getElementById("registerSection").style.display = "block"; // ← これを追加！
+  }
+}
+
+// 初期化処理
+window.addEventListener("DOMContentLoaded", async () => {
+  const targetUser = getQueryParam("user");
+  if (targetUser) {
+    openPublicMypage(targetUser);
+  } else {
+    checkLoginStatus();
+    checkUnreadMessages();
+    await loadRanking();
+  }
+});
+</script>
+
+
+
+</body>
+</html>

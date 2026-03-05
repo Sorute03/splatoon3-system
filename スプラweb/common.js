@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwcxz929EVoZRz5V_qMpOeULXk0d8JuP7D0QvRamDxnDI9n-LD9Fh7WWw8-qWmhzbiQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxlRA2QuSgiFNEV33G7N7UfvjkOeepxZpA1UaV3VMxb3gz7z_HnVQzTvDbbZuEKaq8/exec";
 
 function requireLogin() {
   const userId = localStorage.getItem("userId");
@@ -100,4 +100,5 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+
 

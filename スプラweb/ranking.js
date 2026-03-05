@@ -1,4 +1,9 @@
 let rankingData = null;
+let sortState = {
+  player: { key: "winRate", asc: false },
+  weapon: { key: "winRate", asc: false },
+  playerWeapon: { key: "winRate", asc: false }
+};
 
 async function loadRanking() {
   try {
@@ -29,56 +34,93 @@ function renderRankingTables() {
   weaponBody.innerHTML = "";
   pwBody.innerHTML = "";
 
-  rankingData.playerRanking
+  const playerSorted = [...rankingData.playerRanking]
     .filter(p => p.total >= playerMin)
-    .sort((a, b) => b.winRate - a.winRate)
-    .forEach((p, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${p.playerName}</td>
-        <td>${(p.winRate * 100).toFixed(1)}%</td>
-        <td>${p.wins}</td>
-        <td>${p.total}</td>
-      `;
-      playerBody.appendChild(tr);
-    });
+    .sort(sortBy(sortState.player.key, sortState.player.asc));
+  playerSorted.forEach((p, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${p.playerName}</td>
+      <td>${(p.winRate * 100).toFixed(1)}%</td>
+      <td>${p.wins}</td>
+      <td>${p.total}</td>
+    `;
+    playerBody.appendChild(tr);
+  });
 
-  rankingData.weaponRanking
+  const weaponSorted = [...rankingData.weaponRanking]
     .filter(w => w.total >= weaponMin)
-    .sort((a, b) => b.winRate - a.winRate)
-    .forEach((w, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${w.weapon}</td>
-        <td>${(w.winRate * 100).toFixed(1)}%</td>
-        <td>${w.wins}</td>
-        <td>${w.total}</td>
-      `;
-      weaponBody.appendChild(tr);
-    });
+    .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
+  weaponSorted.forEach((w, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${w.weapon}</td>
+      <td>${(w.winRate * 100).toFixed(1)}%</td>
+      <td>${w.wins}</td>
+      <td>${w.total}</td>
+    `;
+    weaponBody.appendChild(tr);
+  });
 
-  rankingData.playerWeaponRanking
+  const pwSorted = [...rankingData.playerWeaponRanking]
     .filter(pw => pw.total >= pwMin)
-    .sort((a, b) => b.winRate - a.winRate)
-    .forEach((pw, i) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${pw.playerName}</td>
-        <td>${pw.weapon}</td>
-        <td>${(pw.winRate * 100).toFixed(1)}%</td>
-        <td>${pw.wins}</td>
-        <td>${pw.total}</td>
-      `;
-      pwBody.appendChild(tr);
-    });
+    .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
+  pwSorted.forEach((pw, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${pw.playerName}</td>
+      <td>${pw.weapon}</td>
+      <td>${(pw.winRate * 100).toFixed(1)}%</td>
+      <td>${pw.wins}</td>
+      <td>${pw.total}</td>
+    `;
+    pwBody.appendChild(tr);
+  });
+}
+
+function sortBy(key, asc) {
+  return (a, b) => {
+    const valA = typeof a[key] === "string" ? a[key].toLowerCase() : a[key];
+    const valB = typeof b[key] === "string" ? b[key].toLowerCase() : b[key];
+    if (valA < valB) return asc ? -1 : 1;
+    if (valA > valB) return asc ? 1 : -1;
+    return 0;
+  };
 }
 
 function showRanking(type) {
   document.querySelectorAll(".ranking-section").forEach(sec => sec.style.display = "none");
-  if (type === "player") document.getElementById("playerRanking").style.display = "block";
-  if (type === "weapon") document.getElementById("weaponRanking").style.display = "block";
-  if (type === "playerWeapon") document.getElementById("playerWeaponRanking").style.display = "block";
+  document.getElementById(`${type}Ranking`).style.display = "block";
 }
+
+// 🔽 ヘッダークリックでソート切り替え
+function setupSortableHeaders() {
+  const headers = [
+    { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
+    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
+    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] }
+  ];
+
+  headers.forEach(({ table, type, keys }) => {
+    const ths = document.querySelectorAll(`#${table} thead th`);
+    ths.forEach((th, index) => {
+      if (index === 0) return; // 順位列は除外
+      th.style.cursor = "pointer";
+      th.addEventListener("click", () => {
+        const key = keys[index - 1];
+        if (sortState[type].key === key) {
+          sortState[type].asc = !sortState[type].asc;
+        } else {
+          sortState[type].key = key;
+          sortState[type].asc = false;
+        }
+        renderRankingTables();
+      });
+    });
+  });
+}
+
+window.addEventListener("DOMContentLoaded", setupSortableHeaders);

@@ -5,6 +5,7 @@ let sortState = {
   playerWeapon: { key: "winRate", asc: false }
 };
 
+// 初期化：ランキングデータ取得＆表示
 async function loadRanking() {
   try {
     const res = await fetch(API_URL, {
@@ -20,12 +21,19 @@ async function loadRanking() {
   }
 }
 
+// 入力欄の値を取得（空欄なら初期値を返す）
+function getMinValue(id, fallback) {
+  const val = parseInt(document.getElementById(id).value);
+  return isNaN(val) ? fallback : val;
+}
+
+// ランキングテーブルを描画
 function renderRankingTables() {
   if (!rankingData) return;
 
-  const playerMin = parseInt(document.getElementById("playerMinGames").value) || 0;
-  const weaponMin = parseInt(document.getElementById("weaponMinGames").value) || 0;
-  const pwMin = parseInt(document.getElementById("playerWeaponMinGames").value) || 0;
+  const playerMin = getMinValue("playerMinGames", 5);
+  const weaponMin = getMinValue("weaponMinGames", 5);
+  const pwMin = getMinValue("playerWeaponMinGames", 5);
 
   const playerBody = document.querySelector("#playerRankingTable tbody");
   const weaponBody = document.querySelector("#weaponRankingTable tbody");
@@ -81,6 +89,7 @@ function renderRankingTables() {
   });
 }
 
+// ソート関数生成
 function sortBy(key, asc) {
   return (a, b) => {
     const valA = typeof a[key] === "string" ? a[key].toLowerCase() : a[key];
@@ -91,12 +100,13 @@ function sortBy(key, asc) {
   };
 }
 
+// 表示切り替え
 function showRanking(type) {
   document.querySelectorAll(".ranking-section").forEach(sec => sec.style.display = "none");
   document.getElementById(`${type}Ranking`).style.display = "block";
 }
 
-// 🔽 ヘッダークリックでソート切り替え
+// ヘッダークリックでソート切り替え
 function setupSortableHeaders() {
   const headers = [
     { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },

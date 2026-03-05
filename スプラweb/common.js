@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxUgl4_WGDmfwiumYJpsllIEAqmDw1qbULFRccWvOpaRpAzWM-bBzqB_QL7YxpjoTmU/exec";
+const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
 function requireLogin() {
   const userId = localStorage.getItem("userId");
@@ -100,6 +100,7 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+
 
 
 

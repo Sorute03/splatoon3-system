@@ -5,11 +5,26 @@
   <title>ランキング | スプラ戦績</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <script src="ranking.js"></script>
   <style>
-    .ranking-section { display: none; }
+    .ranking-section { display: none; margin-top: 1em; }
     .ranking-buttons button {
       margin: 0.5em;
       padding: 0.5em 1em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 0.5em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.4em 0.6em;
+      text-align: center;
+    }
+    label {
+      display: inline-block;
+      margin-top: 0.5em;
     }
   </style>
 </head>
@@ -31,103 +46,53 @@
       <button onclick="showRanking('playerWeapon')">プレイヤー×武器別勝率</button>
     </div>
 
+    <!-- プレイヤー勝率ランキング -->
     <div id="playerRanking" class="ranking-section">
       <h3>プレイヤー勝率ランキング</h3>
-      <table border="1" id="playerRankingTable">
+      <label>最低試合数：
+        <input type="number" id="playerMinGames" value="5" onchange="renderRankingTables()">
+      </label>
+      <table id="playerRankingTable">
         <thead>
-          <tr><th>順位</th><th>プレイヤー</th><th>勝率</th><th>勝利数</th><th>試合数</th></tr>
+          <tr>
+            <th>順位</th><th>プレイヤー</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
 
+    <!-- 武器別勝率ランキング -->
     <div id="weaponRanking" class="ranking-section">
       <h3>武器別勝率ランキング</h3>
-      <table border="1" id="weaponRankingTable">
+      <label>最低試合数：
+        <input type="number" id="weaponMinGames" value="5" onchange="renderRankingTables()">
+      </label>
+      <table id="weaponRankingTable">
         <thead>
-          <tr><th>順位</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th></tr>
+          <tr>
+            <th>順位</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
 
+    <!-- プレイヤー×武器別勝率ランキング -->
     <div id="playerWeaponRanking" class="ranking-section">
       <h3>プレイヤー×武器別勝率ランキング</h3>
-      <table border="1" id="playerWeaponRankingTable">
+      <label>最低試合数：
+        <input type="number" id="playerWeaponMinGames" value="5" onchange="renderRankingTables()">
+      </label>
+      <table id="playerWeaponRankingTable">
         <thead>
-          <tr><th>順位</th><th>プレイヤー</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th></tr>
+          <tr>
+            <th>順位</th><th>プレイヤー</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+          </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
-
-  <script>
-    function showRanking(type) {
-      document.querySelectorAll(".ranking-section").forEach(sec => sec.style.display = "none");
-      if (type === "player") document.getElementById("playerRanking").style.display = "block";
-      if (type === "weapon") document.getElementById("weaponRanking").style.display = "block";
-      if (type === "playerWeapon") document.getElementById("playerWeaponRanking").style.display = "block";
-    }
-
-    async function loadRanking() {
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({ action: "getRanking" }),
-          headers: { "Content-Type": "application/json" }
-        });
-        const result = await res.json();
-
-        const playerBody = document.querySelector("#playerRankingTable tbody");
-        const weaponBody = document.querySelector("#weaponRankingTable tbody");
-        const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
-        playerBody.innerHTML = "";
-        weaponBody.innerHTML = "";
-        pwBody.innerHTML = "";
-
-        result.playerRanking.forEach((p, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${p.playerName}</td>
-            <td>${(p.winRate * 100).toFixed(1)}%</td>
-            <td>${p.wins}</td>
-            <td>${p.total}</td>
-          `;
-          playerBody.appendChild(tr);
-        });
-
-        result.weaponRanking.forEach((w, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${w.weapon}</td>
-            <td>${(w.winRate * 100).toFixed(1)}%</td>
-            <td>${w.wins}</td>
-            <td>${w.total}</td>
-          `;
-          weaponBody.appendChild(tr);
-        });
-
-        result.playerWeaponRanking.forEach((pw, i) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${pw.playerName}</td>
-            <td>${pw.weapon}</td>
-            <td>${(pw.winRate * 100).toFixed(1)}%</td>
-            <td>${pw.wins}</td>
-            <td>${pw.total}</td>
-          `;
-          pwBody.appendChild(tr);
-        });
-
-        showRanking("player"); // 初期表示
-      } catch (e) {
-        alert("ランキングの読み込みに失敗しました：" + e.message);
-      }
-    }
-  </script>
 </body>
 </html>

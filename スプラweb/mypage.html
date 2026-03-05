@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>マイページ | スプラ戦績</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script>
+</head>
+<body onload="requireLogin(); showUserInfo();">
+  <div class="sidebar">
+    <a href="mypage.html">🏠 マイページ</a>
+    <a href="entry.html">📝 戦績登録</a>
+    <a href="ranking.html">📊 ランキング</a>
+    <a href="admin.html" id="adminLink" style="display:none;">🛠 管理者ページ</a>
+    <a href="#" onclick="logout()">🚪 ログアウト</a>
+  </div>
+  <div class="main">
+    <h2>マイページ</h2>
+    <p>ようこそ、<span id="mypageName"></span> さん！</p>
+  </div>
+</body>
+</html>

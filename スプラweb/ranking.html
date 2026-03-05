@@ -22,6 +22,10 @@
       padding: 0.4em 0.6em;
       text-align: center;
     }
+    th {
+      background-color: #f0f0f0;
+      cursor: pointer;
+    }
     label {
       display: inline-block;
       margin-top: 0.5em;
@@ -50,12 +54,16 @@
     <div id="playerRanking" class="ranking-section">
       <h3>プレイヤー勝率ランキング</h3>
       <label>最低試合数：
-        <input type="number" id="playerMinGames" value="5" onchange="renderRankingTables()">
+        <input type="number" id="playerMinGames" placeholder="例: 5" onchange="renderRankingTables()">
       </label>
       <table id="playerRankingTable">
         <thead>
           <tr>
-            <th>順位</th><th>プレイヤー</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+            <th>順位</th>
+            <th>プレイヤー</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -66,12 +74,16 @@
     <div id="weaponRanking" class="ranking-section">
       <h3>武器別勝率ランキング</h3>
       <label>最低試合数：
-        <input type="number" id="weaponMinGames" value="5" onchange="renderRankingTables()">
+        <input type="number" id="weaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
       </label>
       <table id="weaponRankingTable">
         <thead>
           <tr>
-            <th>順位</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+            <th>順位</th>
+            <th>武器</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -82,12 +94,17 @@
     <div id="playerWeaponRanking" class="ranking-section">
       <h3>プレイヤー×武器別勝率ランキング</h3>
       <label>最低試合数：
-        <input type="number" id="playerWeaponMinGames" value="5" onchange="renderRankingTables()">
+        <input type="number" id="playerWeaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
       </label>
       <table id="playerWeaponRankingTable">
         <thead>
           <tr>
-            <th>順位</th><th>プレイヤー</th><th>武器</th><th>勝率</th><th>勝利数</th><th>試合数</th>
+            <th>順位</th>
+            <th>プレイヤー</th>
+            <th>武器</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
           </tr>
         </thead>
         <tbody></tbody>

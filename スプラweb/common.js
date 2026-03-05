@@ -61,13 +61,21 @@ async function register() {
     return;
   }
 
+  const form = new FormData();
+  form.append("data", JSON.stringify({
+    action: "register",
+    password,
+    playerName,
+    secretId
+  }));
+
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "register", password, playerName, secretId }),
-      headers: { "Content-Type": "application/json" }
+      body: form
     });
     const result = await res.json();
+
     if (result.userId) {
       msg.style.color = "green";
       msg.textContent = `登録完了！あなたのユーザーIDは ${result.userId} です`;
@@ -84,4 +92,3 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
-

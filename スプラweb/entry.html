@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>戦績登録</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; }
+    #matchMessage { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>戦績登録</h2>
+
+  <form id="matchForm">
+    <label>マッチの種類:</label>
+    <select id="matchType" name="matchType" required>
+      <option value="">選択してください</option>
+      <option value="turf">ナワバリバトル</option>
+      <option value="xmatch">Xマッチ</option>
+      <option value="challenge">チャレンジ</option>
+      <option value="open">オープン</option>
+      <option value="event">イベントマッチ</option>
+    </select>
+
+    <label>ルール:</label>
+    <select id="rule" name="rule" required>
+      <option value="">ルールを選択</option>
+    </select>
+
+    <div id="xMatchOptions" style="display:none;">
+      <label>入力方法:</label>
+      <select id="xMatchMode">
+        <option value="single">1戦ずつ入力</option>
+        <option value="set">3戦まとめて入力</option>
+      </select>
+    </div>
+
+    <div id="matchInputs">
+      <label>ステージ:</label>
+      <input type="text" name="stage" required>
+
+      <label>使用ブキ:</label>
+      <input type="text" name="weapon" required>
+
+      <label>キル数:</label>
+      <input type="number" name="kills" min="0" required>
+
+      <label>トドメ数（任意）:</label>
+      <input type="number" name="finishKills" min="0">
+
+      <label>アシストキル数（任意）:</label>
+      <input type="number" name="assistKills" min="0">
+
+      <label>デス数:</label>
+      <input type="number" name="deaths" min="0" required>
+
+      <label>スペシャル使用回数:</label>
+      <input type="number" name="specials" min="0" required>
+    </div>
+
+    <div id="xpInput" style="display:none;">
+      <label>XP:</label>
+      <input type="number" id="xp" name="xp" placeholder="計測中なら空白で確定してください">
+    </div>
+
+    <button type="submit">登録</button>
+  </form>
+
+  <div id="matchMessage"></div>
+
+  <script>
+    const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb App URLに置き換えてね！
+
+    const ruleSelect = document.getElementById("rule");
+    const matchTypeSelect = document.getElementById("matchType");
+    const xpInput = document.getElementById("xpInput");
+    const xpField = document.getElementById("xp");
+
+    const ruleOptions = {
+      turf: ["ナワバリバトル"],
+      xmatch: ["ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"],
+      other: ["ナワバリバトル", "ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"]
+    };
+
+    matchTypeSelect.addEventListener("change", () => {
+      const matchType = matchTypeSelect.value;
+      let rules = [];
+
+      if (matchType === "xmatch") {
+        rules = ruleOptions.xmatch;
+        document.getElementById("xMatchOptions").style.display = "block";
+      } else if (matchType === "turf") {
+        rules = ruleOptions.turf;
+        document.getElementById("xMatchOptions").style.display = "none";
+      } else {
+        rules = ruleOptions.other;
+        document.getElementById("xMatchOptions").style.display = "none";
+      }
+
+      ruleSelect.innerHTML = "";
+      rules.forEach(rule => {
+        const option = document.createElement("option");
+        option.value = rule;
+        option.textContent = rule;
+        ruleSelect.appendChild(option);
+      });
+
+      xpInput.style.display = "none";
+      xpField.value = "";
+    });
+
+    ruleSelect.addEventListener("change", async () => {
+      const rule = ruleSelect.value;
+      const matchType = matchTypeSelect.value;
+      if (matchType === "xmatch" && rule) {
+        const seasonId = await fetchSeasonId();
+        const key = `xpSubmitted_${seasonId}_${rule}`;
+        if (!localStorage.getItem(key)) {
+          xpInput.style.display = "block";
+          xpField.placeholder = "計測中なら空白で確定してください";
+        }
+      }
+    });
+
+    async function fetchSeasonId() {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({ action: "getCurrentSeasonId" }));
+      const res = await fetch(API_URL, { method: "POST", body: formData });
+      const text = await res.text();
+      const result = JSON.parse(text);
+      return result.seasonId;
+    }
+
+    document.getElementById("matchForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const msg = document.getElementById("matchMessage");
+
+      const userId = localStorage.getItem("userId");
+      const secretId = localStorage.getItem("secretId");
+      const seasonId = await fetchSeasonId();
+      const rule = form.rule.value;
+
+      const match = {
+        userId,
+        secretId,
+        matchType: form.matchType.value,
+        rule,
+        stage: form.stage.value.trim(),
+        weapon: form.weapon.value.trim(),
+        kills: Number(form.kills.value),
+        finishKills: form.finishKills.value ? Number(form.finishKills.value) : "",
+        assistKills: form.assistKills.value ? Number(form.assistKills.value) : "",
+        deaths: Number(form.deaths.value),
+        specials: Number(form.specials.value),
+        xp: form.xp.value ? Number(form.xp.value) : ""
+      };
+
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({
+        action: "saveMatch",
+        match
+      }));
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: formData
+        });
+
+        const text = await res.text();
+        const result = JSON.parse(text);
+
+        if (result.status === "ok") {
+          msg.style.color = "green";
+          msg.textContent = "戦績を登録しました！";
+          form.reset();
+          if (match.xp !== "") {
+            const key = `xpSubmitted_${seasonId}_${rule}`;
+            localStorage.setItem(key, "true");
+          }
+        } else {
+          msg.style.color = "red";
+          msg.textContent = "登録失敗：" + (result.error || "不明なエラー");
+        }
+      } catch (e) {
+        msg.style.color = "red";
+        msg.textContent = "通信エラー：" + e.message;
+      }
+    });
+  </script>
+</body>
+</html>

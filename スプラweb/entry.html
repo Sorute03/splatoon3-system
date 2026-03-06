@@ -8,6 +8,8 @@
     label { display: block; margin-top: 10px; }
     input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; }
     #matchMessage { margin-top: 15px; font-weight: bold; }
+    #postSubmitOptions { margin-top: 20px; }
+    #postSubmitOptions button { margin-right: 10px; }
   </style>
 </head>
 <body>
@@ -69,6 +71,12 @@
   </form>
 
   <div id="matchMessage"></div>
+
+  <div id="postSubmitOptions" style="display:none;">
+    <p>次にどうしますか？</p>
+    <button type="button" id="goToMyPage">マイページに戻る</button>
+    <button type="button" id="addAnother">もう1件入力する</button>
+  </div>
 
   <script>
     const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb App URLに置き換えてね！
@@ -176,11 +184,13 @@
         if (result.status === "ok") {
           msg.style.color = "green";
           msg.textContent = "戦績を登録しました！";
-          form.reset();
+
           if (match.xp !== "") {
             const key = `xpSubmitted_${seasonId}_${rule}`;
             localStorage.setItem(key, "true");
           }
+
+          document.getElementById("postSubmitOptions").style.display = "block";
         } else {
           msg.style.color = "red";
           msg.textContent = "登録失敗：" + (result.error || "不明なエラー");
@@ -189,6 +199,17 @@
         msg.style.color = "red";
         msg.textContent = "通信エラー：" + e.message;
       }
+    });
+
+    document.getElementById("goToMyPage").addEventListener("click", () => {
+      window.location.href = "mypage.html"; // ← 遷移先に合わせて変更してね！
+    });
+
+    document.getElementById("addAnother").addEventListener("click", () => {
+      document.getElementById("matchForm").reset();
+      document.getElementById("matchMessage").textContent = "";
+      document.getElementById("postSubmitOptions").style.display = "none";
+      xpInput.style.display = "none";
     });
   </script>
 </body>

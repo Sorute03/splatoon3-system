@@ -57,8 +57,7 @@
     <button type="button" id="goToMyPage">マイページに戻る</button>
     <button type="button" id="addAnother">もう1件入力する</button>
   </div>
-
-  <script>
+    <script>
     const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb App URLに置き換えてね！
 
     const ruleSelect = document.getElementById("rule");
@@ -66,11 +65,27 @@
     const xpInput = document.getElementById("xpInput");
     const xpField = document.getElementById("xp");
 
+    let weaponList = [];
+    let stageList = [];
+
     const ruleOptions = {
       turf: ["ナワバリバトル"],
       xmatch: ["ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"],
       other: ["ナワバリバトル", "ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"]
     };
+
+    async function fetchList(action) {
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({ action }));
+      const res = await fetch(API_URL, { method: "POST", body: formData });
+      return await res.json();
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      weaponList = await fetchList("getWeaponList");
+      stageList = await fetchList("getStageList");
+      updateMatchInputs();
+    });
 
     function createMatchInput(index = null) {
       const container = document.createElement("div");
@@ -82,8 +97,8 @@
       }
 
       const fields = [
-        { label: "ステージ", name: "stage", required: true },
-        { label: "使用ブキ", name: "weapon", required: true },
+        { label: "ステージ", name: "stage", type: "select-stage", required: true },
+        { label: "使用ブキ", name: "weapon", type: "select-weapon", required: true },
         { label: "キル数", name: "kills", type: "number", required: true },
         { label: "トドメ数（任意）", name: "finishKills", type: "number" },
         { label: "アシストキル数（任意）", name: "assistKills", type: "number" },
@@ -94,11 +109,34 @@
       fields.forEach(f => {
         const label = document.createElement("label");
         label.textContent = f.label;
-        const input = document.createElement("input");
-        input.name = f.name + (index !== null ? `_${index}` : "");
-        input.type = f.type || "text";
-        if (f.required) input.required = true;
-        label.appendChild(input);
+
+        if (f.type === "select-weapon" || f.type === "select-stage") {
+          const select = document.createElement("select");
+          select.name = f.name + (index !== null ? `_${index}` : "");
+          if (f.required) select.required = true;
+
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "選択してください";
+          select.appendChild(defaultOption);
+
+          const list = f.type === "select-weapon" ? weaponList : stageList;
+          list.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item;
+            option.textContent = item;
+            select.appendChild(option);
+          });
+
+          label.appendChild(select);
+        } else {
+          const input = document.createElement("input");
+          input.name = f.name + (index !== null ? `_${index}` : "");
+          input.type = f.type || "text";
+          if (f.required) input.required = true;
+          label.appendChild(input);
+        }
+
         container.appendChild(label);
       });
 
@@ -200,9 +238,67 @@
             assistKills: form[`assistKills_${i}`].value ? Number(form[`assistKills_${i}`].value) : "",
             deaths: Number(form[`deaths_${i}`].value),
             specials: Number(form[`specials_${i}`].value),
-            xp: "" // XPはあとで1回だけ入れる
+            xp: ""
           });
         }
         const xp = form.xp.value ? Number(form.xp.value) : "";
         matches[matches.length - 1].xp = xp;
       } else {
+        matches.push({
+          userId,
+          secretId,
+          matchType,
+          rule,
+          stage: form.stage.value.trim(),
+          weapon: form.weapon.value.trim(),
+          kills: Number(form.kills.value),
+          finishKills: form.finishKills.value ? Number(form.finishKills.value) : "",
+          assistKills: form.assistKills.value ? Number(form.assistKills.value) : "",
+          deaths: Number(form.deaths.value),
+          specials: Number(form.specials.value),
+          xp: form.xp.value ? Number(form.xp.value) : ""
+        });
+      }
+
+      let successCount = 0;
+      for (const match of matches) {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify({ action: "saveMatch", match }));
+        try {
+          const res = await fetch(API_URL, { method: "POST", body: formData });
+          const text = await res.text();
+          const result = JSON.parse(text);
+          if (result.status === "ok") successCount++;
+        } catch (e) {
+          console.error("送信エラー:", e);
+        }
+      }
+
+      if (successCount === matches.length) {
+        msg.style.color = "green";
+        msg.textContent = "戦績を登録しました！";
+        if (matches[matches.length - 1].xp !== "") {
+          const key = `xpSubmitted_${seasonId}_${rule}`;
+          localStorage.setItem(key, "true");
+        }
+        document.getElementById("postSubmitOptions").style.display = "block";
+      } else {
+        msg.style.color = "red";
+        msg.textContent = "一部の戦績登録に失敗しました";
+      }
+    });
+
+    document.getElementById("goToMyPage").addEventListener("click", () => {
+      window.location.href = "mypage.html"; // ← 遷移先に合わせて変更してね！
+    });
+
+    document.getElementById("addAnother").addEventListener("click", () => {
+      document.getElementById("matchForm").reset();
+      document.getElementById("matchMessage").textContent = "";
+      document.getElementById("postSubmitOptions").style.display = "none";
+      xpInput.style.display = "none";
+      updateMatchInputs();
+    });
+  </script>
+</body>
+</html>

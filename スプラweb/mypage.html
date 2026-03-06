@@ -5,18 +5,115 @@
   <title>マイページ | スプラ戦績</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
+  <style>
+    label { display: block; margin-top: 10px; }
+    input { width: 100%; padding: 6px; margin-top: 4px; }
+    #status { margin-top: 15px; font-weight: bold; }
+    .section { margin-top: 30px; }
+  </style>
 </head>
 <body onload="requireLogin(); showUserInfo();">
-  <div class="sidebar">
+  <div class="="sidebar">
     <a href="mypage.html">🏠 マイページ</a>
     <a href="entry.html">📝 戦績登録</a>
     <a href="ranking.html">📊 ランキング</a>
     <a href="admin.html" id="adminLink" style="display:none;">🛠 管理者ページ</a>
     <a href="#" onclick="logout()">🚪 ログアウト</a>
   </div>
+
   <div class="main">
     <h2>マイページ</h2>
     <p>ようこそ、<span id="mypageName"></span> さん！</p>
+
+    <div class="section">
+      <h3>あなたのID情報</h3>
+      <p><strong>ユーザーID:</strong> <span id="userIdDisplay"></span></p>
+      <p><strong>シークレットID:</strong> <span id="secretIdDisplay"></span></p>
+    </div>
+
+    <div class="section">
+      <h3>パスワード変更</h3>
+      <form id="passwordForm">
+        <label>現在のパスワード:
+          <input type="password" name="currentPassword" required>
+        </label>
+        <label>新しいパスワード:
+          <input type="password" name="newPassword" required>
+        </label>
+        <label>新しいパスワード（確認）:
+          <input type="password" name="confirmPassword" required>
+        </label>
+        <button type="submit">変更する</button>
+      </form>
+      <div id="status"></div>
+    </div>
   </div>
+
+  <script>
+    const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb App URLに置き換えてね！
+
+    function showUserInfo() {
+      const userId = localStorage.getItem("userId");
+      const secretId = localStorage.getItem("secretId");
+      const name = localStorage.getItem("userName");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+      document.getElementById("userIdDisplay").textContent = userId || "(未登録)";
+      document.getElementById("secretIdDisplay").textContent = secretId || "(未登録)";
+      document.getElementById("mypageName").textContent = name || "プレイヤー";
+
+      if (isAdmin) {
+        document.getElementById("adminLink").style.display = "block";
+      }
+    }
+
+    document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const status = document.getElementById("status");
+
+      const userId = localStorage.getItem("userId");
+      const secretId = localStorage.getItem("secretId");
+      const currentPassword = form.currentPassword.value;
+      const newPassword = form.newPassword.value;
+      const confirmPassword = form.confirmPassword.value;
+
+      if (newPassword !== confirmPassword) {
+        status.style.color = "red";
+        status.textContent = "新しいパスワードが一致しません。";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({
+        action: "changePassword",
+        userId,
+        secretId,
+        currentPassword,
+        newPassword
+      }));
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: formData
+        });
+        const text = await res.text();
+        const result = JSON.parse(text);
+
+        if (result.status === "ok") {
+          status.style.color = "green";
+          status.textContent = "パスワードを変更しました！";
+          form.reset();
+        } else {
+          status.style.color = "red";
+          status.textContent = "変更失敗：" + (result.error || "不明なエラー");
+        }
+      } catch (err) {
+        status.style.color = "red";
+        status.textContent = "通信エラー：" + err.message;
+      }
+    });
+  </script>
 </body>
 </html>

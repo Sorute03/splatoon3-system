@@ -39,9 +39,19 @@ async function login() {
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: form // ← headersは書かない！
+      body: form
     });
-    const result = await res.json();
+
+    const text = await res.text();
+    console.log("レスポンス文字列（login）:", text);
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      msg.textContent = "レスポンスがJSONではありません：" + text;
+      return;
+    }
 
     if (result.success) {
       localStorage.setItem("userId", userId);
@@ -55,7 +65,6 @@ async function login() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
-
 
 async function register() {
   const playerName = document.getElementById("regPlayerName").value.trim();
@@ -82,7 +91,18 @@ async function register() {
       method: "POST",
       body: form
     });
-    const result = await res.json();
+
+    const text = await res.text();
+    console.log("レスポンス文字列（register）:", text);
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      msg.style.color = "red";
+      msg.textContent = "レスポンスがJSONではありません：" + text;
+      return;
+    }
 
     if (result.userId) {
       msg.style.color = "green";
@@ -100,11 +120,3 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
-
-
-
-
-
-
-
-

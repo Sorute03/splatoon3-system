@@ -6,7 +6,8 @@
   <style>
     body { font-family: sans-serif; padding: 20px; }
     label { display: block; margin-top: 10px; }
-    input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; }
+    input, select { width: 100%; padding: 6px; margin-top: 4px; }
+    .match-block { border: 1px solid #ccc; padding: 10px; margin-top: 15px; }
     #matchMessage { margin-top: 15px; font-weight: bold; }
     #postSubmitOptions { margin-top: 20px; }
     #postSubmitOptions button { margin-right: 10px; }
@@ -39,28 +40,7 @@
       </select>
     </div>
 
-    <div id="matchInputs">
-      <label>ステージ:</label>
-      <input type="text" name="stage" required>
-
-      <label>使用ブキ:</label>
-      <input type="text" name="weapon" required>
-
-      <label>キル数:</label>
-      <input type="number" name="kills" min="0" required>
-
-      <label>トドメ数（任意）:</label>
-      <input type="number" name="finishKills" min="0">
-
-      <label>アシストキル数（任意）:</label>
-      <input type="number" name="assistKills" min="0">
-
-      <label>デス数:</label>
-      <input type="number" name="deaths" min="0" required>
-
-      <label>スペシャル使用回数:</label>
-      <input type="number" name="specials" min="0" required>
-    </div>
+    <div id="matchInputs"></div>
 
     <div id="xpInput" style="display:none;">
       <label>XP:</label>
@@ -92,6 +72,54 @@
       other: ["ナワバリバトル", "ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"]
     };
 
+    function createMatchInput(index = null) {
+      const container = document.createElement("div");
+      container.className = "match-block";
+      if (index !== null) {
+        const title = document.createElement("h4");
+        title.textContent = `第${index + 1}戦`;
+        container.appendChild(title);
+      }
+
+      const fields = [
+        { label: "ステージ", name: "stage", required: true },
+        { label: "使用ブキ", name: "weapon", required: true },
+        { label: "キル数", name: "kills", type: "number", required: true },
+        { label: "トドメ数（任意）", name: "finishKills", type: "number" },
+        { label: "アシストキル数（任意）", name: "assistKills", type: "number" },
+        { label: "デス数", name: "deaths", type: "number", required: true },
+        { label: "スペシャル使用回数", name: "specials", type: "number", required: true }
+      ];
+
+      fields.forEach(f => {
+        const label = document.createElement("label");
+        label.textContent = f.label;
+        const input = document.createElement("input");
+        input.name = f.name + (index !== null ? `_${index}` : "");
+        input.type = f.type || "text";
+        if (f.required) input.required = true;
+        label.appendChild(input);
+        container.appendChild(label);
+      });
+
+      return container;
+    }
+
+    function updateMatchInputs() {
+      const matchType = matchTypeSelect.value;
+      const mode = document.getElementById("xMatchMode").value;
+      const container = document.getElementById("matchInputs");
+      container.innerHTML = "";
+
+      if (matchType === "xmatch" && mode === "set") {
+        for (let i = 0; i < 3; i++) {
+          container.appendChild(createMatchInput(i));
+        }
+      } else {
+        container.appendChild(createMatchInput());
+      }
+    }
+
     matchTypeSelect.addEventListener("change", () => {
       const matchType = matchTypeSelect.value;
       let rules = [];
@@ -117,7 +145,10 @@
 
       xpInput.style.display = "none";
       xpField.value = "";
+      updateMatchInputs();
     });
+
+    document.getElementById("xMatchMode").addEventListener("change", updateMatchInputs);
 
     ruleSelect.addEventListener("change", async () => {
       const rule = ruleSelect.value;
@@ -150,67 +181,28 @@
       const secretId = localStorage.getItem("secretId");
       const seasonId = await fetchSeasonId();
       const rule = form.rule.value;
+      const matchType = form.matchType.value;
+      const mode = document.getElementById("xMatchMode").value;
 
-      const match = {
-        userId,
-        secretId,
-        matchType: form.matchType.value,
-        rule,
-        stage: form.stage.value.trim(),
-        weapon: form.weapon.value.trim(),
-        kills: Number(form.kills.value),
-        finishKills: form.finishKills.value ? Number(form.finishKills.value) : "",
-        assistKills: form.assistKills.value ? Number(form.assistKills.value) : "",
-        deaths: Number(form.deaths.value),
-        specials: Number(form.specials.value),
-        xp: form.xp.value ? Number(form.xp.value) : ""
-      };
+      const matches = [];
 
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({
-        action: "saveMatch",
-        match
-      }));
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: formData
-        });
-
-        const text = await res.text();
-        const result = JSON.parse(text);
-
-        if (result.status === "ok") {
-          msg.style.color = "green";
-          msg.textContent = "戦績を登録しました！";
-
-          if (match.xp !== "") {
-            const key = `xpSubmitted_${seasonId}_${rule}`;
-            localStorage.setItem(key, "true");
-          }
-
-          document.getElementById("postSubmitOptions").style.display = "block";
-        } else {
-          msg.style.color = "red";
-          msg.textContent = "登録失敗：" + (result.error || "不明なエラー");
+      if (matchType === "xmatch" && mode === "set") {
+        for (let i = 0; i < 3; i++) {
+          matches.push({
+            userId,
+            secretId,
+            matchType,
+            rule,
+            stage: form[`stage_${i}`].value.trim(),
+            weapon: form[`weapon_${i}`].value.trim(),
+            kills: Number(form[`kills_${i}`].value),
+            finishKills: form[`finishKills_${i}`].value ? Number(form[`finishKills_${i}`].value) : "",
+            assistKills: form[`assistKills_${i}`].value ? Number(form[`assistKills_${i}`].value) : "",
+            deaths: Number(form[`deaths_${i}`].value),
+            specials: Number(form[`specials_${i}`].value),
+            xp: "" // XPはあとで1回だけ入れる
+          });
         }
-      } catch (e) {
-        msg.style.color = "red";
-        msg.textContent = "通信エラー：" + e.message;
-      }
-    });
-
-    document.getElementById("goToMyPage").addEventListener("click", () => {
-      window.location.href = "mypage.html"; // ← 遷移先に合わせて変更してね！
-    });
-
-    document.getElementById("addAnother").addEventListener("click", () => {
-      document.getElementById("matchForm").reset();
-      document.getElementById("matchMessage").textContent = "";
-      document.getElementById("postSubmitOptions").style.display = "none";
-      xpInput.style.display = "none";
-    });
-  </script>
-</body>
-</html>
+        const xp = form.xp.value ? Number(form.xp.value) : "";
+        matches[matches.length - 1].xp = xp;
+      } else {

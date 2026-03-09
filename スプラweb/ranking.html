@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>ランキング | スプラ戦績</title>
   <link rel="stylesheet" href="style.css">
-  <script src="common.js"></script>
-  <script src="ranking.js"></script>
   <style>
     .ranking-section { display: none; margin-top: 1em; }
     .ranking-buttons button {
@@ -42,7 +40,7 @@
     }
   </style>
 </head>
-<body onload="requireLogin(); initRankingPage(); showUserInfo();">
+<body>
   <div class="sidebar">
     <a href="mypage.html">🏠 マイページ</a>
     <a href="entry.html">📝 戦績登録</a>
@@ -127,5 +125,9 @@
       </table>
     </div>
   </div>
+
+  <!-- スクリプトは最後に読み込む！ -->
+  <script src="common.js"></script>
+  <script src="ranking.js"></script>
 </body>
 </html>

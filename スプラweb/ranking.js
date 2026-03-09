@@ -211,11 +211,12 @@ function showRanking(type) {
 // ヘッダークリックでソート切り替え
 function setupSortableHeaders() {
   const headers = [
-    { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
-    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"]},
-    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
-    { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
-  ];
+  { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
+  { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
+  { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
+  { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
+]; // ← ここで配列を閉じる！
+
 
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
@@ -242,4 +243,5 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
+
 

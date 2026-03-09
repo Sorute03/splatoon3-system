@@ -1,3 +1,5 @@
+
+
 let rankingData = null;
 let sortState = {
   player: { key: "winRate", asc: false },
@@ -5,17 +7,57 @@ let sortState = {
   playerWeapon: { key: "winRate", asc: false }
 };
 
-// 初期化：ランキングデータ取得＆表示
-async function loadRanking() {
+// 初期化：シーズン一覧取得 → 初期ランキング読み込み
+async function initRankingPage() {
+  await initSeasonDropdown();
+  setupSortableHeaders();
+}
+
+// シーズン一覧を取得してドロップダウンに反映
+async function initSeasonDropdown() {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "getRankingIndex" }),
+    headers: { "Content-Type": "application/json" }
+  });
+  const index = await res.json();
+  const select = document.getElementById("seasonSelect");
+  select.innerHTML = "";
+
+  index.forEach(season => {
+    const option = document.createElement("option");
+    option.value = season.seasonId;
+    option.textContent = season.name;
+    select.appendChild(option);
+  });
+
+  if (index.length > 0) {
+    select.value = "ALL";
+    await loadRankingForSeason("ALL");
+  }
+}
+
+// 指定シーズンのランキングを取得
+async function loadRankingForSeason(seasonId) {
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "getRanking" }),
+      body: JSON.stringify({
+        action: "getCachedRanking",
+        seasonId: seasonId
+      }),
       headers: { "Content-Type": "application/json" }
     });
     rankingData = await res.json();
     renderRankingTables();
     showRanking("player");
+
+    if (rankingData.updatedAt) {
+      document.getElementById("lastUpdated").textContent =
+        `最終更新: ${new Date(rankingData.updatedAt).toLocaleString()}`;
+    } else {
+      document.getElementById("lastUpdated").textContent = "";
+    }
   } catch (e) {
     alert("ランキングの読み込みに失敗しました：" + e.message);
   }
@@ -42,7 +84,7 @@ function renderRankingTables() {
   weaponBody.innerHTML = "";
   pwBody.innerHTML = "";
 
-  const playerSorted = [...rankingData.playerRanking]
+  const playerSorted = [...(rankingData.playerRanking || [])]
     .filter(p => p.total >= playerMin)
     .sort(sortBy(sortState.player.key, sortState.player.asc));
   playerSorted.forEach((p, i) => {
@@ -57,7 +99,7 @@ function renderRankingTables() {
     playerBody.appendChild(tr);
   });
 
-  const weaponSorted = [...rankingData.weaponRanking]
+  const weaponSorted = [...(rankingData.weaponRanking || [])]
     .filter(w => w.total >= weaponMin)
     .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
   weaponSorted.forEach((w, i) => {
@@ -72,7 +114,7 @@ function renderRankingTables() {
     weaponBody.appendChild(tr);
   });
 
-  const pwSorted = [...rankingData.playerWeaponRanking]
+  const pwSorted = [...(rankingData.playerWeaponRanking || [])]
     .filter(pw => pw.total >= pwMin)
     .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
   pwSorted.forEach((pw, i) => {
@@ -132,5 +174,3 @@ function setupSortableHeaders() {
     });
   });
 }
-
-window.addEventListener("DOMContentLoaded", setupSortableHeaders);

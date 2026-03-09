@@ -70,15 +70,20 @@ function renderRankingTables() {
   if (!rankingData) return;
 
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
+  const matchTypeFilter = document.getElementById("matchTypeFilter").value;
+  const ruleFilter = document.getElementById("ruleFilter").value;
 
-  // プレイヤー勝率
+  // プレイヤー勝率（ルール×マッチタイプ別）
   const playerMin = getMinValue("playerMinGames", 5);
   const playerNameFilter = document.getElementById("playerNameFilter").value.toLowerCase();
   const playerLimit = getMinValue("playerLimitFilter", Infinity);
   const playerBody = document.querySelector("#playerRankingTable tbody");
   playerBody.innerHTML = "";
 
-  const playerSorted = [...(rankingData.playerRanking || [])]
+  const key = `${ruleFilter || "ALL"}|${matchTypeFilter || "ALL"}`;
+  const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
+
+  const playerSorted = [...playerSource]
     .filter(p => p.total >= playerMin)
     .filter(p => p.playerName.toLowerCase().includes(playerNameFilter))
     .filter(p => {
@@ -141,6 +146,11 @@ function renderRankingTables() {
       const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === pw.playerName);
       return !xpEntry || xpEntry.xp >= globalXpMin;
     })
+    .filter(pw => {
+      if (matchTypeFilter && pw.matchType !== matchTypeFilter) return false;
+      if (ruleFilter && pw.rule !== ruleFilter) return false;
+      return true;
+    })
     .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc))
     .slice(0, pwLimit);
 
@@ -195,7 +205,8 @@ function sortBy(key, asc) {
 // 表示切り替え
 function showRanking(type) {
   document.querySelectorAll(".ranking-section").forEach(sec => sec.style.display = "none");
-  document.getElementById(`${type}Ranking`).style.display = "block";
+  const target = document.getElementById(`${type}Ranking`);
+  if (target) target.style.display = "block";
 }
 
 // ヘッダークリックでソート切り替え
@@ -209,26 +220,26 @@ function setupSortableHeaders() {
 
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
-        ths.forEach((th, index) => {
-          if (index === 0) return; // 順位列は除外
-          th.style.cursor = "pointer";
-          th.addEventListener("click", () => {
-            const key = keys[index - 1];
-            if (sortState[type].key === key) {
-              sortState[type].asc = !sortState[type].asc;
-            } else {
-              sortState[type].key = key;
-              sortState[type].asc = false;
-            }
-            renderRankingTables();
-          });
-        });
+    ths.forEach((th, index) => {
+      if (index === 0) return; // 順位列は除外
+      th.style.cursor = "pointer";
+      th.addEventListener("click", () => {
+        const key = keys[index - 1];
+        if (sortState[type].key === key) {
+          sortState[type].asc = !sortState[type].asc;
+        } else {
+          sortState[type].key = key;
+          sortState[type].asc = false;
+        }
+        renderRankingTables();
       });
-    }
-    
-    // 初期化トリガー
-    window.addEventListener("DOMContentLoaded", () => {
-      requireLogin();
-      initRankingPage();
-      showUserInfo();
     });
+  });
+}
+
+// 初期化トリガー
+window.addEventListener("DOMContentLoaded", () => {
+  requireLogin();
+  initRankingPage();
+  showUserInfo();
+});

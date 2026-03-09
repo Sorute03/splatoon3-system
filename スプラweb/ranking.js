@@ -1,9 +1,9 @@
-
 let rankingData = null;
 let sortState = {
   player: { key: "winRate", asc: false },
   weapon: { key: "winRate", asc: false },
-  playerWeapon: { key: "winRate", asc: false }
+  playerWeapon: { key: "winRate", asc: false },
+  xp: { key: "xp", asc: false }
 };
 
 async function initRankingPage() {
@@ -73,13 +73,9 @@ function renderRankingTables() {
   const weaponMin = getMinValue("weaponMinGames", 5);
   const pwMin = getMinValue("playerWeaponMinGames", 5);
 
+  // プレイヤー勝率
   const playerBody = document.querySelector("#playerRankingTable tbody");
-  const weaponBody = document.querySelector("#weaponRankingTable tbody");
-  const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
   playerBody.innerHTML = "";
-  weaponBody.innerHTML = "";
-  pwBody.innerHTML = "";
-
   const playerSorted = [...(rankingData.playerRanking || [])]
     .filter(p => p.total >= playerMin)
     .sort(sortBy(sortState.player.key, sortState.player.asc));
@@ -95,6 +91,9 @@ function renderRankingTables() {
     playerBody.appendChild(tr);
   });
 
+  // 武器別勝率
+  const weaponBody = document.querySelector("#weaponRankingTable tbody");
+  weaponBody.innerHTML = "";
   const weaponSorted = [...(rankingData.weaponRanking || [])]
     .filter(w => w.total >= weaponMin)
     .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
@@ -102,7 +101,7 @@ function renderRankingTables() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
-            <td>${w.weapon}</td>
+      <td>${w.weapon}</td>
       <td>${(w.winRate * 100).toFixed(1)}%</td>
       <td>${w.wins}</td>
       <td>${w.total}</td>
@@ -110,6 +109,9 @@ function renderRankingTables() {
     weaponBody.appendChild(tr);
   });
 
+  // プレイヤー×武器別勝率
+  const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
+  pwBody.innerHTML = "";
   const pwSorted = [...(rankingData.playerWeaponRanking || [])]
     .filter(pw => pw.total >= pwMin)
     .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
@@ -124,6 +126,21 @@ function renderRankingTables() {
       <td>${pw.total}</td>
     `;
     pwBody.appendChild(tr);
+  });
+
+  // XPランキング
+  const xpBody = document.querySelector("#xpRankingTable tbody");
+  xpBody.innerHTML = "";
+  const xpSorted = [...(rankingData.xpRanking || [])]
+    .sort(sortBy(sortState.xp.key, sortState.xp.asc));
+  xpSorted.forEach((entry, i) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${entry.playerName}</td>
+      <td>${entry.xp}</td>
+    `;
+    xpBody.appendChild(tr);
   });
 }
 
@@ -149,7 +166,8 @@ function setupSortableHeaders() {
   const headers = [
     { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
     { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
-    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] }
+    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
+    { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
   ];
 
   headers.forEach(({ table, type, keys }) => {
@@ -177,5 +195,3 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
-
-

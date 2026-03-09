@@ -210,12 +210,13 @@ function showRanking(type) {
 
 // ヘッダークリックでソート切り替え
 function setupSortableHeaders() {
-  const headers = [
+ const headers = [
   { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
   { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
   { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
   { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
-]; // ← ここで配列を閉じる！
+]; // ← ここが抜けてるとエラーになる！
+
 
 
   headers.forEach(({ table, type, keys }) => {
@@ -243,5 +244,6 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
+
 
 

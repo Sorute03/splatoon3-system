@@ -27,6 +27,7 @@
     label {
       display: inline-block;
       margin-top: 0.5em;
+      margin-right: 1em;
     }
     #seasonSelect {
       margin-top: 0.5em;
@@ -37,6 +38,9 @@
       font-size: 0.9em;
       color: #666;
       margin-top: 0.5em;
+    }
+    .filter-group {
+      margin-top: 1em;
     }
   </style>
 </head>
@@ -58,6 +62,12 @@
     </select>
     <p id="lastUpdated"></p>
 
+    <div class="filter-group">
+      <label>最小XP（全ランキング共通）：
+        <input type="number" id="globalXpMinFilter" placeholder="例: 2500" onchange="renderRankingTables()">
+      </label>
+    </div>
+
     <div class="ranking-buttons">
       <button onclick="showRanking('player')">プレイヤー勝率</button>
       <button onclick="showRanking('weapon')">武器別勝率</button>
@@ -70,6 +80,17 @@
       <h3>プレイヤー勝率ランキング</h3>
       <label>最低試合数：
         <input type="number" id="playerMinGames" placeholder="例: 5" onchange="renderRankingTables()">
+      </label>
+      <label>プレイヤー名で検索：
+        <input type="text" id="playerNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
+      </label>
+      <label>表示件数：
+        <select id="playerLimitFilter" onchange="renderRankingTables()">
+          <option value="">すべて</option>
+          <option value="10">TOP 10</option>
+          <option value="20">TOP 20</option>
+          <option value="50">TOP 50</option>
+        </select>
       </label>
       <table id="playerRankingTable">
         <thead>
@@ -91,6 +112,17 @@
       <label>最低試合数：
         <input type="number" id="weaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
       </label>
+      <label>武器名で検索：
+        <input type="text" id="weaponNameFilter" placeholder="例: スプラシューター" oninput="renderRankingTables()">
+      </label>
+      <label>表示件数：
+        <select id="weaponLimitFilter" onchange="renderRankingTables()">
+          <option value="">すべて</option>
+          <option value="10">TOP 10</option>
+          <option value="20">TOP 20</option>
+          <option value="50">TOP 50</option>
+        </select>
+      </label>
       <table id="weaponRankingTable">
         <thead>
           <tr>
@@ -111,6 +143,20 @@
       <label>最低試合数：
         <input type="number" id="playerWeaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
       </label>
+      <label>プレイヤー名で検索：
+        <input type="text" id="playerWeaponNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
+      </label>
+      <label>武器名で検索：
+        <input type="text" id="playerWeaponWeaponFilter" placeholder="例: スプラシューター" oninput="renderRankingTables()">
+      </label>
+      <label>表示件数：
+        <select id="playerWeaponLimitFilter" onchange="renderRankingTables()">
+          <option value="">すべて</option>
+          <option value="10">TOP 10</option>
+          <option value="20">TOP 20</option>
+          <option value="50">TOP 50</option>
+        </select>
+      </label>
       <table id="playerWeaponRankingTable">
         <thead>
           <tr>
@@ -129,6 +175,20 @@
     <!-- XPランキング -->
     <div id="xpRanking" class="ranking-section">
       <h3>XPランキング</h3>
+      <label>最小XP：
+        <input type="number" id="xpMinFilter" placeholder="例: 2500" onchange="renderRankingTables()">
+      </label>
+      <label>プレイヤー名で検索：
+        <input type="text" id="xpNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
+      </label>
+      <label>表示件数：
+        <select id="xpLimitFilter" onchange="renderRankingTables()">
+          <option value="">すべて</option>
+          <option value="10">TOP 10</option>
+          <option value="20">TOP 20</option>
+          <option value="50">TOP 50</option>
+        </select>
+      </label>
       <table id="xpRankingTable">
         <thead>
           <tr>

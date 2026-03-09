@@ -72,15 +72,15 @@ function renderRankingTables() {
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
   const matchTypeFilter = document.getElementById("matchTypeFilter").value;
   const ruleFilter = document.getElementById("ruleFilter").value;
+  const key = `${ruleFilter || "ALL"}|${matchTypeFilter || "ALL"}`;
 
-  // プレイヤー勝率（ルール×マッチタイプ別）
+  // プレイヤー勝率
   const playerMin = getMinValue("playerMinGames", 5);
   const playerNameFilter = document.getElementById("playerNameFilter").value.toLowerCase();
   const playerLimit = getMinValue("playerLimitFilter", Infinity);
   const playerBody = document.querySelector("#playerRankingTable tbody");
   playerBody.innerHTML = "";
 
-  const key = `${ruleFilter || "ALL"}|${matchTypeFilter || "ALL"}`;
   const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
 
   const playerSorted = [...playerSource]
@@ -112,7 +112,9 @@ function renderRankingTables() {
   const weaponBody = document.querySelector("#weaponRankingTable tbody");
   weaponBody.innerHTML = "";
 
-  const weaponSorted = [...(rankingData.weaponRanking || [])]
+  const weaponSource = (rankingData.weaponRankingByRuleAndType || {})[key] || [];
+
+  const weaponSorted = [...weaponSource]
     .filter(w => w.total >= weaponMin)
     .filter(w => w.weapon.toLowerCase().includes(weaponNameFilter))
     .sort(sortBy(sortState.weapon.key, sortState.weapon.asc))
@@ -138,18 +140,15 @@ function renderRankingTables() {
   const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
   pwBody.innerHTML = "";
 
-  const pwSorted = [...(rankingData.playerWeaponRanking || [])]
+  const pwSource = (rankingData.playerWeaponRankingByRuleAndType || {})[key] || [];
+
+  const pwSorted = [...pwSource]
     .filter(pw => pw.total >= pwMin)
     .filter(pw => pw.playerName.toLowerCase().includes(pwNameFilter))
     .filter(pw => pw.weapon.toLowerCase().includes(pwWeaponFilter))
     .filter(pw => {
       const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === pw.playerName);
       return !xpEntry || xpEntry.xp >= globalXpMin;
-    })
-    .filter(pw => {
-      if (matchTypeFilter && pw.matchType !== matchTypeFilter) return false;
-      if (ruleFilter && pw.rule !== ruleFilter) return false;
-      return true;
     })
     .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc))
     .slice(0, pwLimit);
@@ -213,7 +212,7 @@ function showRanking(type) {
 function setupSortableHeaders() {
   const headers = [
     { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
-    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
+    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"]
     { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
     { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
   ];

@@ -62,6 +62,7 @@
       <button onclick="showRanking('player')">プレイヤー勝率</button>
       <button onclick="showRanking('weapon')">武器別勝率</button>
       <button onclick="showRanking('playerWeapon')">プレイヤー×武器別勝率</button>
+      <button onclick="showRanking('xp')">XPランキング</button>
     </div>
 
     <!-- プレイヤー勝率ランキング -->
@@ -119,6 +120,21 @@
             <th>勝率</th>
             <th>勝利数</th>
             <th>試合数</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- XPランキング -->
+    <div id="xpRanking" class="ranking-section">
+      <h3>XPランキング</h3>
+      <table id="xpRankingTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>プレイヤー</th>
+            <th>XP</th>
           </tr>
         </thead>
         <tbody></tbody>

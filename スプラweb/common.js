@@ -120,3 +120,4 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+

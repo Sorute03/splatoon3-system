@@ -62,23 +62,32 @@ async function loadRankingForSeason(seasonId) {
 }
 
 function getMinValue(id, fallback) {
-  const val = parseInt(document.getElementById(id).value);
+  const val = parseInt(document.getElementById(id)?.value);
   return isNaN(val) ? fallback : val;
 }
 
 function renderRankingTables() {
   if (!rankingData) return;
 
-  const playerMin = getMinValue("playerMinGames", 5);
-  const weaponMin = getMinValue("weaponMinGames", 5);
-  const pwMin = getMinValue("playerWeaponMinGames", 5);
+  const globalXpMin = getMinValue("globalXpMinFilter", 0);
 
   // プレイヤー勝率
+  const playerMin = getMinValue("playerMinGames", 5);
+  const playerNameFilter = document.getElementById("playerNameFilter").value.toLowerCase();
+  const playerLimit = getMinValue("playerLimitFilter", Infinity);
   const playerBody = document.querySelector("#playerRankingTable tbody");
   playerBody.innerHTML = "";
+
   const playerSorted = [...(rankingData.playerRanking || [])]
     .filter(p => p.total >= playerMin)
-    .sort(sortBy(sortState.player.key, sortState.player.asc));
+    .filter(p => p.playerName.toLowerCase().includes(playerNameFilter))
+    .filter(p => {
+      const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === p.playerName);
+      return !xpEntry || xpEntry.xp >= globalXpMin;
+    })
+    .sort(sortBy(sortState.player.key, sortState.player.asc))
+    .slice(0, playerLimit);
+
   playerSorted.forEach((p, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -92,11 +101,18 @@ function renderRankingTables() {
   });
 
   // 武器別勝率
+  const weaponMin = getMinValue("weaponMinGames", 5);
+  const weaponNameFilter = document.getElementById("weaponNameFilter").value.toLowerCase();
+  const weaponLimit = getMinValue("weaponLimitFilter", Infinity);
   const weaponBody = document.querySelector("#weaponRankingTable tbody");
   weaponBody.innerHTML = "";
+
   const weaponSorted = [...(rankingData.weaponRanking || [])]
     .filter(w => w.total >= weaponMin)
-    .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
+    .filter(w => w.weapon.toLowerCase().includes(weaponNameFilter))
+    .sort(sortBy(sortState.weapon.key, sortState.weapon.asc))
+    .slice(0, weaponLimit);
+
   weaponSorted.forEach((w, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -110,11 +126,24 @@ function renderRankingTables() {
   });
 
   // プレイヤー×武器別勝率
+  const pwMin = getMinValue("playerWeaponMinGames", 5);
+  const pwNameFilter = document.getElementById("playerWeaponNameFilter").value.toLowerCase();
+  const pwWeaponFilter = document.getElementById("playerWeaponWeaponFilter").value.toLowerCase();
+  const pwLimit = getMinValue("playerWeaponLimitFilter", Infinity);
   const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
   pwBody.innerHTML = "";
+
   const pwSorted = [...(rankingData.playerWeaponRanking || [])]
     .filter(pw => pw.total >= pwMin)
-    .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
+    .filter(pw => pw.playerName.toLowerCase().includes(pwNameFilter))
+    .filter(pw => pw.weapon.toLowerCase().includes(pwWeaponFilter))
+    .filter(pw => {
+      const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === pw.playerName);
+      return !xpEntry || xpEntry.xp >= globalXpMin;
+    })
+    .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc))
+    .slice(0, pwLimit);
+
   pwSorted.forEach((pw, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -129,10 +158,18 @@ function renderRankingTables() {
   });
 
   // XPランキング
+  const xpMin = getMinValue("xpMinFilter", globalXpMin);
+  const xpNameFilter = document.getElementById("xpNameFilter").value.toLowerCase();
+  const xpLimit = getMinValue("xpLimitFilter", Infinity);
   const xpBody = document.querySelector("#xpRankingTable tbody");
   xpBody.innerHTML = "";
+
   const xpSorted = [...(rankingData.xpRanking || [])]
-    .sort(sortBy(sortState.xp.key, sortState.xp.asc));
+    .filter(entry => entry.xp >= xpMin)
+    .filter(entry => entry.playerName.toLowerCase().includes(xpNameFilter))
+    .sort(sortBy(sortState.xp.key, sortState.xp.asc))
+    .slice(0, xpLimit);
+
   xpSorted.forEach((entry, i) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -172,26 +209,26 @@ function setupSortableHeaders() {
 
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
-    ths.forEach((th, index) => {
-      if (index === 0) return; // 順位列は除外
-      th.style.cursor = "pointer";
-      th.addEventListener("click", () => {
-        const key = keys[index - 1];
-        if (sortState[type].key === key) {
-          sortState[type].asc = !sortState[type].asc;
-        } else {
-          sortState[type].key = key;
-          sortState[type].asc = false;
-        }
-        renderRankingTables();
+        ths.forEach((th, index) => {
+          if (index === 0) return; // 順位列は除外
+          th.style.cursor = "pointer";
+          th.addEventListener("click", () => {
+            const key = keys[index - 1];
+            if (sortState[type].key === key) {
+              sortState[type].asc = !sortState[type].asc;
+            } else {
+              sortState[type].key = key;
+              sortState[type].asc = false;
+            }
+            renderRankingTables();
+          });
+        });
       });
+    }
+    
+    // 初期化トリガー
+    window.addEventListener("DOMContentLoaded", () => {
+      requireLogin();
+      initRankingPage();
+      showUserInfo();
     });
-  });
-}
-
-// 初期化トリガー
-window.addEventListener("DOMContentLoaded", () => {
-  requireLogin();
-  initRankingPage();
-  showUserInfo();
-});

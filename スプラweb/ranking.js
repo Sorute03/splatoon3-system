@@ -18,7 +18,10 @@ async function initSeasonDropdown() {
     body: JSON.stringify({ action: "getRankingIndex" }),
     headers: { "Content-Type": "application/json" }
   });
-  const index = await res.json();
+
+  const result = await res.json();
+  const index = Array.isArray(result) ? result : result.index || [];
+
   const select = document.getElementById("seasonSelect");
   select.innerHTML = "";
 
@@ -210,14 +213,12 @@ function showRanking(type) {
 
 // ヘッダークリックでソート切り替え
 function setupSortableHeaders() {
- const headers = [
-  { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
-  { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
-  { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
-  { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
-]; // ← ここが抜けてるとエラーになる！
-
-
+  const headers = [
+    { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
+    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
+    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
+    { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
+  ];
 
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
@@ -244,6 +245,3 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
-
-
-

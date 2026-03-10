@@ -1,4 +1,4 @@
-const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
+
 const currentUserId = localStorage.getItem("userId");
 
 function showUserInfo() {

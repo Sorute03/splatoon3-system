@@ -1,4 +1,4 @@
-const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb AppのURLに置き換えてね
+const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
 const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
 
 let rankingData = null;
@@ -326,3 +326,4 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+

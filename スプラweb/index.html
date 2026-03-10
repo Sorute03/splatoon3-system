@@ -42,30 +42,28 @@
   </div>
 
   <script>
-    
-
     function login() {
       const userId = document.getElementById("loginUserId").value.trim();
       const password = document.getElementById("loginPassword").value;
       const msg = document.getElementById("loginMessage");
       msg.textContent = "";
 
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({
-        action: "login",
-        userId,
-        password
-      }));
-
       fetch(API_URL, {
         method: "POST",
-        body: formData
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          action: "login",
+          userId,
+          password
+        })
       })
       .then(res => res.text())
       .then(text => {
         const result = JSON.parse(text);
-        if (result.status === "ok") {
-          localStorage.setItem("userId", result.userId);
+        if (result.success) {
+          localStorage.setItem("userId", userId);
           localStorage.setItem("secretId", result.secretId);
           localStorage.setItem("userName", result.userName || "");
           localStorage.setItem("isAdmin", result.isAdmin ? "true" : "false");
@@ -102,19 +100,19 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({
-        action: "changePassword",
-        userId,
-        secretId,
-        currentPassword: "", // 空で送信（GAS側で無視）
-        newPassword
-      }));
-
       try {
         const res = await fetch(API_URL, {
           method: "POST",
-          body: formData
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            action: "changePassword",
+            userId,
+            secretId,
+            currentPassword: "",
+            newPassword
+          })
         });
         const text = await res.text();
         const result = JSON.parse(text);
@@ -135,4 +133,3 @@
   </script>
 </body>
 </html>
-

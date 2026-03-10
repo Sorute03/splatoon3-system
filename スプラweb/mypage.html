@@ -1,20 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <title>マイページ | スプラ戦績</title>
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
-  <script src="mypage.js"></script>
+  <script src="mypage.js" defer></script>
   <style>
     label { display: block; margin-top: 10px; }
     input { width: 100%; padding: 6px; margin-top: 4px; }
     #status { margin-top: 15px; font-weight: bold; }
     .section { margin-top: 30px; }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 1.5em;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      position: relative;
+    }
+    .close {
+      position: absolute;
+      top: 0.5em;
+      right: 1em;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body onload="requireLogin(); showUserInfo();">
-  <div class="="sidebar">
+  <div class="sidebar">
     <a href="mypage.html">🏠 マイページ</a>
     <a href="entry.html">📝 戦績登録</a>
     <a href="ranking.html">📊 ランキング</a>
@@ -24,8 +49,8 @@
 
   <div class="main">
     <h2>マイページ</h2>
-    <p>ようこそ、<span id="mypageName"></span> さん！</p>
-    <div id="reportArea"></div> <!-- ← これを追加 -->
+    <p id="welcomeMessage">ようこそ、<span id="mypageName"></span> さん！</p>
+    <div id="reportArea"></div>
 
     <div class="section">
       <h3>あなたのID情報</h3>
@@ -33,7 +58,7 @@
       <p><strong>シークレットID:</strong> <span id="secretIdDisplay"></span></p>
     </div>
 
-    <div class="section">
+    <div class="section" id="passwordSection">
       <h3>パスワード変更</h3>
       <form id="passwordForm">
         <label>現在のパスワード:
@@ -51,87 +76,17 @@
     </div>
   </div>
 
-  <script>
-
-    function showUserInfo() {
-      const userId = localStorage.getItem("userId");
-      const secretId = localStorage.getItem("secretId");
-      const name = localStorage.getItem("userName");
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-      document.getElementById("userIdDisplay").textContent = userId || "(未登録)";
-      document.getElementById("secretIdDisplay").textContent = secretId || "(未登録)";
-      document.getElementById("mypageName").textContent = name || "プレイヤー";
-
-      if (isAdmin) {
-        document.getElementById("adminLink").style.display = "block";
-      }
-    }
-
-    document.getElementById("passwordForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const status = document.getElementById("status");
-
-      const userId = localStorage.getItem("userId");
-      const secretId = localStorage.getItem("secretId");
-      const currentPassword = form.currentPassword.value;
-      const newPassword = form.newPassword.value;
-      const confirmPassword = form.confirmPassword.value;
-
-      if (newPassword !== confirmPassword) {
-        status.style.color = "red";
-        status.textContent = "新しいパスワードが一致しません。";
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("data", JSON.stringify({
-        action: "changePassword",
-        userId,
-        secretId,
-        currentPassword,
-        newPassword
-      }));
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: formData
-        });
-        const text = await res.text();
-        const result = JSON.parse(text);
-
-        if (result.status === "ok") {
-          status.style.color = "green";
-          status.textContent = "パスワードを変更しました！";
-          form.reset();
-        } else {
-          status.style.color = "red";
-          status.textContent = "変更失敗：" + (result.error || "不明なエラー");
-        }
-      } catch (err) {
-        status.style.color = "red";
-        status.textContent = "通信エラー：" + err.message;
-      }
-    });
-  </script>
-  <!-- 通報モーダル（bodyの最後に追加するとスッキリ） -->
+  <!-- 通報モーダル -->
   <div id="reportModal" class="modal" style="display:none;">
     <div class="modal-content">
       <span id="closeReportModal" class="close">&times;</span>
       <h2>通報フォーム</h2>
       <p id="reportTarget"></p>
-      <textarea id="reportReason" placeholder="通報理由を入力してください"></textarea><br>
-      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" /><br>
+      <textarea id="reportReason" placeholder="通報理由を入力してください" rows="4" style="width:100%;"></textarea><br>
+      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" style="width:100%;" /><br><br>
       <button id="submitReportBtn">通報を送信</button>
-      <div id="reportStatus"></div>
+      <div id="reportStatus" style="margin-top: 0.5em; color: red;"></div>
     </div>
   </div>
 </body>
 </html>
-
-
-
-
-

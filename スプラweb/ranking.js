@@ -1,4 +1,10 @@
+const API_URL = "YOUR_WEBAPP_URL"; // ← あなたのWeb AppのURLに置き換えてね
+const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
+
 let rankingData = null;
+let reportTargetId = "";
+let reportTargetName = "";
+
 let sortState = {
   player: { key: "winRate", asc: false },
   weapon: { key: "winRate", asc: false },
@@ -29,21 +35,18 @@ async function initSeasonDropdown() {
       return;
     }
 
-    // プルダウンに選択肢を追加
     index.forEach(season => {
       const option = document.createElement("option");
       option.value = season.seasonId;
-      option.textContent = season.name || season.seasonId; // 表示は seasonName、なければ ID
+      option.textContent = season.name || season.seasonId;
       select.appendChild(option);
     });
 
-    // 初期選択状態でランキングを読み込む
     if (index.length > 0) {
       select.value = index[0].seasonId;
       await loadRankingForSeason(index[0].seasonId);
     }
 
-    // イベントリスナーを設定
     select.addEventListener("change", async () => {
       await loadRankingForSeason(select.value);
     });
@@ -114,12 +117,16 @@ function renderRankingTables() {
 
   playerSorted.forEach((p, i) => {
     const tr = document.createElement("tr");
+    const isSelf = p.userId === currentUserId; // userIdがある場合
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${p.playerName}</td>
       <td>${(p.winRate * 100).toFixed(1)}%</td>
       <td>${p.wins}</td>
       <td>${p.total}</td>
+      <td>
+        ${!isSelf ? `<button onclick="openReport('${p.userId || p.playerName}', '${p.playerName}')">🚨 通報</button>` : ""}
+      </td>
     `;
     playerBody.appendChild(tr);
   });
@@ -203,7 +210,7 @@ function renderRankingTables() {
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${entry.playerName}</td>
-      <td>${entry.xp}</td>
+            <td>${entry.xp}</td>
     `;
     xpBody.appendChild(tr);
   });
@@ -236,7 +243,6 @@ function setupSortableHeaders() {
     { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
   ];
 
-  
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
     ths.forEach((th, index) => {
@@ -256,11 +262,67 @@ function setupSortableHeaders() {
   });
 }
 
+// 通報モーダルを開く
+function openReport(userId, name) {
+  reportTargetId = userId;
+  reportTargetName = name;
+  document.getElementById("reportTarget").textContent = `通報対象: ${name} (${userId})`;
+  document.getElementById("reportReason").value = "";
+  document.getElementById("reportEvidence").value = "";
+  document.getElementById("reportStatus").textContent = "";
+  document.getElementById("reportModal").style.display = "flex";
+}
+
 // 初期化トリガー
 window.addEventListener("DOMContentLoaded", () => {
   requireLogin();
   initRankingPage();
   showUserInfo();
+
+  // 通報モーダルのイベント設定
+  document.getElementById("closeReportModal").onclick = () => {
+    document.getElementById("reportModal").style.display = "none";
+  };
+
+  document.getElementById("submitReportBtn").onclick = async () => {
+    const reason = document.getElementById("reportReason").value.trim();
+    const evidence = document.getElementById("reportEvidence").value.trim();
+    const status = document.getElementById("reportStatus");
+
+    if (!reason) {
+      status.textContent = "通報理由を入力してください";
+      return;
+    }
+
+    const timestamp = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submitReport",
+          report: {
+            reporterId: currentUserId,
+            targetId: reportTargetId,
+            reason,
+            evidence,
+            timestamp
+          }
+        })
+      });
+
+      const result = await res.json();
+      if (result.status === "ok") {
+        status.textContent = "通報を送信しました。対応をお待ちください。";
+        setTimeout(() => {
+          document.getElementById("reportModal").style.display = "none";
+        }, 1500);
+      } else {
+        status.textContent = "送信に失敗しました：" + result.error;
+      }
+    } catch (e) {
+      status.textContent = "通信エラー：" + e.message;
+    }
+  };
 });
-
-

@@ -9,6 +9,8 @@
 </section>
 
 <script>
+const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← ここで定義
+
 async function loadUsers() {
   const res = await fetch(API_URL, {
     method: "POST",

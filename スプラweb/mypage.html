@@ -62,13 +62,13 @@
       <h3>パスワード変更</h3>
       <form id="passwordForm">
         <label>現在のパスワード:
-          <input type="password" name="currentPassword" required>
+          <input type="password" name="currentPassword" autocomplete="current-password" required>
         </label>
         <label>新しいパスワード:
-          <input type="password" name="newPassword" required>
+          <input type="password" name="newPassword" autocomplete="new-password" required>
         </label>
         <label>新しいパスワード（確認）:
-          <input type="password" name="confirmPassword" required>
+          <input type="password" name="confirmPassword" autocomplete="new-password" required>
         </label>
         <button type="submit">変更する</button>
       </form>

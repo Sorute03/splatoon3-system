@@ -13,28 +13,44 @@ async function initRankingPage() {
 
 // シーズン一覧を取得してドロップダウンに反映
 async function initSeasonDropdown() {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "getRankingIndex" }),
-    headers: { "Content-Type": "application/json" }
-  });
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getRankingIndex" })
+    });
 
-  const result = await res.json();
-  const index = Array.isArray(result) ? result : result.index || [];
+    const result = await res.json();
+    const index = Array.isArray(result) ? result : result.index || [];
 
-  const select = document.getElementById("seasonSelect");
-  select.innerHTML = "";
+    const select = document.getElementById("seasonSelect");
+    if (!select) {
+      console.warn("seasonSelect 要素が見つかりません");
+      return;
+    }
 
-  index.forEach(season => {
-    const option = document.createElement("option");
-    option.value = season.seasonId;
-    option.textContent = season.name;
-    select.appendChild(option);
-  });
+    // プルダウンに選択肢を追加
+    index.forEach(season => {
+      const option = document.createElement("option");
+      option.value = season.seasonId;
+      option.textContent = season.name || season.seasonId; // 表示は seasonName、なければ ID
+      select.appendChild(option);
+    });
 
-  if (index.length > 0) {
-    select.value = "ALL";
-    await loadRankingForSeason("ALL");
+    // 初期選択状態でランキングを読み込む
+    if (index.length > 0) {
+      select.value = index[0].seasonId;
+      await loadRankingForSeason(index[0].seasonId);
+    }
+
+    // イベントリスナーを設定
+    select.addEventListener("change", async () => {
+      await loadRankingForSeason(select.value);
+    });
+
+  } catch (e) {
+    console.error("initSeasonDropdown error:", e);
+    alert("ランキングの読み込みに失敗しました：" + e.message);
   }
 }
 
@@ -246,4 +262,5 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
+
 

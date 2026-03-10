@@ -1,0 +1,96 @@
+<section>
+  <h2>ユーザー一覧</h2>
+  <div id="userList"></div>
+</section>
+
+<section>
+  <h2>通報一覧</h2>
+  <div id="reportList"></div>
+</section>
+
+<script>
+async function loadUsers() {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "getUserList" })
+  });
+  const users = await res.json();
+  const container = document.getElementById("userList");
+  container.innerHTML = "";
+
+  users.forEach(user => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <strong>${user.PlayerName}</strong> (${user.UserID})<br>
+      BAN: ${user.IsBanned} | モデレーター: ${user.isModerator}
+      <button onclick="toggleBan('${user.UserID}', ${user.IsBanned !== 'TRUE'})">
+        ${user.IsBanned === 'TRUE' ? '解除' : 'BAN'}
+      </button>
+      <button onclick="toggleMod('${user.UserID}', ${user.isModerator !== 'TRUE'})">
+        ${user.isModerator === 'TRUE' ? '解除' : 'モデレーターにする'}
+      </button>
+      <hr>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function toggleBan(userId, newStatus) {
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "banUser", userId, isBanned: newStatus })
+  });
+  loadUsers();
+}
+
+async function toggleMod(userId, newStatus) {
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "setModerator", userId, isModerator: newStatus })
+  });
+  loadUsers();
+}
+
+async function loadReports() {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "getReports" })
+  });
+  const reports = await res.json();
+  const container = document.getElementById("reportList");
+  container.innerHTML = "";
+
+  reports.forEach(report => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <strong>${report.reporterId}</strong> → <strong>${report.targetId}</strong><br>
+      理由: ${report.reason}<br>
+      日時: ${report.timestamp}<br>
+      状態: ${report.status}<br>
+      <textarea id="note-${report.reportId}" placeholder="対応メモ"></textarea>
+      <button onclick="handleReport('${report.reportId}')">対応済みにする</button>
+      <hr>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function handleReport(reportId) {
+  const note = document.getElementById(`note-${reportId}`).value;
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "markReportHandled", reportId, note })
+  });
+  loadReports();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadUsers();
+  loadReports();
+});
+</script>

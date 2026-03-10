@@ -1,31 +1,5 @@
-
+// API_URL は common.js で定義されている前提
 const currentUserId = localStorage.getItem("userId");
-
-function showUserInfo() {
-  const userId = localStorage.getItem("userId");
-  const secretId = localStorage.getItem("secretId");
-  const name = localStorage.getItem("userName");
-  const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const viewedUserId = urlParams.get("user") || userId;
-
-  document.getElementById("userIdDisplay").textContent = viewedUserId;
-  document.getElementById("secretIdDisplay").textContent = viewedUserId === userId ? (secretId || "(未登録)") : "非公開";
-
-  if (viewedUserId === userId) {
-    document.getElementById("mypageName").textContent = name || "プレイヤー";
-    document.getElementById("welcomeMessage").textContent = `ようこそ、${name || "プレイヤー"} さん！`;
-  } else {
-    document.getElementById("mypageName").textContent = viewedUserId;
-    document.getElementById("welcomeMessage").textContent = `${viewedUserId} さんのページ`;
-  }
-
-  if (isAdmin) {
-    document.getElementById("adminLink").style.display = "block";
-  }
-}
-
 
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -37,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reportArea.innerHTML = `
       <button onclick="openReport('${viewedUserId}', 'このプレイヤー')">🚨 通報</button>
     `;
+    document.getElementById("passwordSection").style.display = "none";
   }
 
   // 通報モーダルのイベント設定
@@ -86,6 +61,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+
+function showUserInfo() {
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+  const name = localStorage.getItem("userName");
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewedUserId = urlParams.get("user") || userId;
+
+  document.getElementById("userIdDisplay").textContent = viewedUserId;
+  document.getElementById("secretIdDisplay").textContent = viewedUserId === userId ? (secretId || "(未登録)") : "非公開";
+
+  if (viewedUserId === userId) {
+    document.getElementById("mypageName").textContent = name || "プレイヤー";
+    document.getElementById("welcomeMessage").textContent = `ようこそ、${name || "プレイヤー"} さん！`;
+  } else {
+    document.getElementById("mypageName").textContent = viewedUserId;
+    document.getElementById("welcomeMessage").textContent = `${viewedUserId} さんのページ`;
+  }
+
+  if (isAdmin) {
+    document.getElementById("adminLink").style.display = "block";
+  }
+}
 
 // 通報モーダルを開く関数
 function openReport(userId, name) {

@@ -1,128 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ランキング | スプラ戦績</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .ranking-section { display: none; margin-top: 1em; }
-    .ranking-buttons button {
-      margin: 0.5em;
-      padding: 0.5em 1em;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 0.5em;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.4em 0.6em;
-      text-align: center;
-    }
-    th {
-      background-color: #f0f0f0;
-      cursor: pointer;
-    }
-    label {
-      display: inline-block;
-      margin-top: 0.5em;
-      margin-right: 1em;
-    }
-    #seasonSelect {
-      margin-top: 0.5em;
-      padding: 0.4em;
-      font-size: 1em;
-    }
-    #lastUpdated {
-      font-size: 0.9em;
-      color: #666;
-      margin-top: 0.5em;
-    }
-    .filter-group {
-      margin-top: 1em;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>ランキング</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="sidebar">
-    <a href="mypage.html">🏠 マイページ</a>
-    <a href="entry.html">📝 戦績登録</a>
-    <a href="ranking.html">📊 ランキング</a>
-    <a href="admin.html" id="adminLink" style="display:none;">🛠 管理者ページ</a>
-    <a href="#" onclick="logout()">🚪 ログアウト</a>
-  </div>
+  <div id="sidebar-container"></div>
 
-  <div class="main">
-    <h2>ランキング</h2>
+  <main class="main">
+    <h1>ランキング</h1>
 
-    <label for="seasonSelect">シーズン選択：</label>
-    <select id="seasonSelect" onchange="loadRankingForSeason(this.value)">
-      <option>読み込み中...</option>
-    </select>
-    <p id="lastUpdated"></p>
+    <label for="seasonSelect">シーズン選択:</label>
+    <select id="seasonSelect"></select>
+    <div id="lastUpdated"></div>
 
-    <div class="filter-group">
-      <label>最小XP（全ランキング共通）：
-        <input type="number" id="globalXpMinFilter" placeholder="例: 2500" onchange="renderRankingTables()">
-      </label>
-    </div>
-
-    <div class="ranking-buttons">
-      <button onclick="showRanking('player')">プレイヤー勝率</button>
-      <button onclick="showRanking('weapon')">武器別勝率</button>
-      <button onclick="showRanking('playerWeapon')">プレイヤー×武器別勝率</button>
-      <button onclick="showRanking('xp')">XPランキング</button>
-    </div>
-
-    <!-- プレイヤー勝率ランキング -->
-    <div id="playerRanking" class="ranking-section">
-      <h3>プレイヤー勝率ランキング</h3>
-      <label>最低試合数：
-        <input type="number" id="playerMinGames" placeholder="例: 5" onchange="renderRankingTables()">
-      </label>
-      <label>プレイヤー名で検索：
-        <input type="text" id="playerNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
-      </label>
-      <label>表示件数：
-        <select id="playerLimitFilter" onchange="renderRankingTables()">
-          <option value="">すべて</option>
-          <option value="10">TOP 10</option>
-          <option value="20">TOP 20</option>
-          <option value="50">TOP 50</option>
-        </select>
-      </label>
+    <!-- プレイヤーランキング -->
+    <section id="playerRanking" class="ranking-section">
+      <h2>プレイヤー勝率ランキング</h2>
       <table id="playerRankingTable">
         <thead>
           <tr>
             <th>順位</th>
-            <th>プレイヤー</th>
+            <th>プレイヤー名</th>
             <th>勝率</th>
             <th>勝利数</th>
             <th>試合数</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-    </div>
+    </section>
 
-    <!-- 武器別勝率ランキング -->
-    <div id="weaponRanking" class="ranking-section">
-      <h3>武器別勝率ランキング</h3>
-      <label>最低試合数：
-        <input type="number" id="weaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
-      </label>
-      <label>武器名で検索：
-        <input type="text" id="weaponNameFilter" placeholder="例: スプラシューター" oninput="renderRankingTables()">
-      </label>
-      <label>表示件数：
-        <select id="weaponLimitFilter" onchange="renderRankingTables()">
-          <option value="">すべて</option>
-          <option value="10">TOP 10</option>
-          <option value="20">TOP 20</option>
-          <option value="50">TOP 50</option>
-        </select>
-      </label>
+    <!-- 武器ランキング -->
+    <section id="weaponRanking" class="ranking-section" style="display:none;">
+      <h2>武器別勝率ランキング</h2>
       <table id="weaponRankingTable">
         <thead>
           <tr>
@@ -135,33 +48,16 @@
         </thead>
         <tbody></tbody>
       </table>
-    </div>
+    </section>
 
-    <!-- プレイヤー×武器別勝率ランキング -->
-    <div id="playerWeaponRanking" class="ranking-section">
-      <h3>プレイヤー×武器別勝率ランキング</h3>
-      <label>最低試合数：
-        <input type="number" id="playerWeaponMinGames" placeholder="例: 5" onchange="renderRankingTables()">
-      </label>
-      <label>プレイヤー名で検索：
-        <input type="text" id="playerWeaponNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
-      </label>
-      <label>武器名で検索：
-        <input type="text" id="playerWeaponWeaponFilter" placeholder="例: スプラシューター" oninput="renderRankingTables()">
-      </label>
-      <label>表示件数：
-        <select id="playerWeaponLimitFilter" onchange="renderRankingTables()">
-          <option value="">すべて</option>
-          <option value="10">TOP 10</option>
-          <option value="20">TOP 20</option>
-          <option value="50">TOP 50</option>
-        </select>
-      </label>
+    <!-- プレイヤー×武器ランキング -->
+    <section id="playerWeaponRanking" class="ranking-section" style="display:none;">
+      <h2>プレイヤー×武器別勝率ランキング</h2>
       <table id="playerWeaponRankingTable">
         <thead>
           <tr>
             <th>順位</th>
-            <th>プレイヤー</th>
+            <th>プレイヤー名</th>
             <th>武器</th>
             <th>勝率</th>
             <th>勝利数</th>
@@ -170,53 +66,45 @@
         </thead>
         <tbody></tbody>
       </table>
-    </div>
+    </section>
 
     <!-- XPランキング -->
-    <div id="xpRanking" class="ranking-section">
-      <h3>XPランキング</h3>
-      <label>最小XP：
-        <input type="number" id="xpMinFilter" placeholder="例: 2500" onchange="renderRankingTables()">
-      </label>
-      <label>プレイヤー名で検索：
-        <input type="text" id="xpNameFilter" placeholder="例: アクア" oninput="renderRankingTables()">
-      </label>
-      <label>表示件数：
-        <select id="xpLimitFilter" onchange="renderRankingTables()">
-          <option value="">すべて</option>
-          <option value="10">TOP 10</option>
-          <option value="20">TOP 20</option>
-          <option value="50">TOP 50</option>
-        </select>
-      </label>
+    <section id="xpRanking" class="ranking-section" style="display:none;">
+      <h2>XPランキング</h2>
       <table id="xpRankingTable">
         <thead>
           <tr>
             <th>順位</th>
-            <th>プレイヤー</th>
+            <th>プレイヤー名</th>
             <th>XP</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-    </div>
-  </div>
-  <!-- 通報モーダル（bodyの最後に追加するとスッキリ） -->
+    </section>
+  </main>
+
+  <!-- 通報モーダル -->
   <div id="reportModal" class="modal" style="display:none;">
     <div class="modal-content">
       <span id="closeReportModal" class="close">&times;</span>
       <h2>通報フォーム</h2>
       <p id="reportTarget"></p>
-      <textarea id="reportReason" placeholder="通報理由を入力してください"></textarea><br>
-      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" /><br>
+      <textarea id="reportReason" placeholder="通報理由を入力してください" rows="4" style="width:100%;"></textarea><br>
+      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" style="width:100%;" /><br><br>
       <button id="submitReportBtn">通報を送信</button>
-      <div id="reportStatus"></div>
+      <div id="reportStatus" style="margin-top: 0.5em; color: red;"></div>
     </div>
   </div>
 
-  <!-- スクリプトは最後に読み込む！ -->
-  <script src="common.js"></script>
+  <script>
+    // サイドバー読み込み
+    fetch("sidebar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("sidebar-container").innerHTML = html;
+      });
+  </script>
   <script src="ranking.js"></script>
 </body>
 </html>
-

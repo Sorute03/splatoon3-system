@@ -18,6 +18,21 @@
     <!-- プレイヤーランキング -->
     <section id="playerRanking" class="ranking-section">
       <h2>プレイヤー勝率ランキング</h2>
+      <div class="filters">
+        <label>最小試合数:
+          <input type="number" id="playerMinGames" value="5" min="0" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="playerNameFilter" placeholder="名前で検索" />
+        </label>
+        <label>最小XP:
+          <input type="number" id="globalXpMinFilter" value="0" min="0" />
+        </label>
+        <label>表示件数:
+          <input type="number" id="playerLimitFilter" value="100" min="1" />
+        </label>
+        <button onclick="renderRankingTables()">フィルター適用</button>
+      </div>
       <table id="playerRankingTable">
         <thead>
           <tr>
@@ -36,6 +51,18 @@
     <!-- 武器ランキング -->
     <section id="weaponRanking" class="ranking-section" style="display:none;">
       <h2>武器別勝率ランキング</h2>
+      <div class="filters">
+        <label>最小試合数:
+          <input type="number" id="weaponMinGames" value="5" min="0" />
+        </label>
+        <label>武器名フィルター:
+          <input type="text" id="weaponNameFilter" placeholder="武器名で検索" />
+        </label>
+        <label>表示件数:
+          <input type="number" id="weaponLimitFilter" value="100" min="1" />
+        </label>
+        <button onclick="renderRankingTables()">フィルター適用</button>
+      </div>
       <table id="weaponRankingTable">
         <thead>
           <tr>
@@ -53,6 +80,21 @@
     <!-- プレイヤー×武器ランキング -->
     <section id="playerWeaponRanking" class="ranking-section" style="display:none;">
       <h2>プレイヤー×武器別勝率ランキング</h2>
+      <div class="filters">
+        <label>最小試合数:
+          <input type="number" id="playerWeaponMinGames" value="5" min="0" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="playerWeaponNameFilter" placeholder="名前で検索" />
+        </label>
+        <label>武器名フィルター:
+          <input type="text" id="playerWeaponWeaponFilter" placeholder="武器名で検索" />
+        </label>
+        <label>表示件数:
+          <input type="number" id="playerWeaponLimitFilter" value="100" min="1" />
+        </label>
+        <button onclick="renderRankingTables()">フィルター適用</button>
+      </div>
       <table id="playerWeaponRankingTable">
         <thead>
           <tr>
@@ -71,6 +113,18 @@
     <!-- XPランキング -->
     <section id="xpRanking" class="ranking-section" style="display:none;">
       <h2>XPランキング</h2>
+      <div class="filters">
+        <label>最小XP:
+          <input type="number" id="xpMinFilter" value="0" min="0" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="xpNameFilter" placeholder="名前で検索" />
+        </label>
+        <label>表示件数:
+          <input type="number" id="xpLimitFilter" value="100" min="1" />
+        </label>
+        <button onclick="renderRankingTables()">フィルター適用</button>
+      </div>
       <table id="xpRankingTable">
         <thead>
           <tr>

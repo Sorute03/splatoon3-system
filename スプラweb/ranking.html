@@ -201,9 +201,22 @@
       </table>
     </div>
   </div>
+  <!-- 通報モーダル（bodyの最後に追加するとスッキリ） -->
+  <div id="reportModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeReportModal" class="close">&times;</span>
+      <h2>通報フォーム</h2>
+      <p id="reportTarget"></p>
+      <textarea id="reportReason" placeholder="通報理由を入力してください"></textarea><br>
+      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" /><br>
+      <button id="submitReportBtn">通報を送信</button>
+      <div id="reportStatus"></div>
+    </div>
+  </div>
 
   <!-- スクリプトは最後に読み込む！ -->
   <script src="common.js"></script>
   <script src="ranking.js"></script>
 </body>
 </html>
+

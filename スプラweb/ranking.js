@@ -220,6 +220,7 @@ function setupSortableHeaders() {
     { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
   ];
 
+  
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
     ths.forEach((th, index) => {
@@ -245,3 +246,4 @@ window.addEventListener("DOMContentLoaded", () => {
   initRankingPage();
   showUserInfo();
 });
+

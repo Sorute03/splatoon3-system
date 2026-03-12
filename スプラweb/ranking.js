@@ -1,6 +1,14 @@
 const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
 const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
 
+function requireLogin() {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    alert("ログインが必要です！");
+    window.location.href = "login.html"; // ← ログインページのURLに合わせてね
+  }
+}
+
 
 let rankingData = null;
 let reportTargetId = "";
@@ -332,5 +340,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+
 
 

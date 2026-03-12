@@ -8,8 +8,8 @@
   <div id="reportList"></div>
 </section>
 
-<script>
-const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← ここで定義
+<<script>
+const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
 async function loadUsers() {
   const res = await fetch(API_URL, {
@@ -17,9 +17,17 @@ async function loadUsers() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "getUserList" })
   });
-  const users = await res.json();
+
+  const result = await res.json();
+  const users = result.users;
   const container = document.getElementById("userList");
   container.innerHTML = "";
+
+  if (!Array.isArray(users)) {
+    container.textContent = "ユーザー情報の取得に失敗しました。";
+    console.error("users is not an array:", users);
+    return;
+  }
 
   users.forEach(user => {
     const div = document.createElement("div");
@@ -62,8 +70,9 @@ async function loadReports() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "getReports" })
   });
+
   const result = await res.json();
-  const reports = result.reports; // ← ここを修正！
+  const reports = result.reports;
   const container = document.getElementById("reportList");
   container.innerHTML = "";
 

@@ -15,6 +15,14 @@
     <select id="seasonSelect"></select>
     <div id="lastUpdated"></div>
 
+    <!-- ランキング切り替えボタン -->
+    <div class="ranking-tabs" style="margin: 1em 0;">
+      <button onclick="showRanking('player')">プレイヤー</button>
+      <button onclick="showRanking('weapon')">ブキ</button>
+      <button onclick="showRanking('playerWeapon')">プレイヤー×ブキ</button>
+      <button onclick="showRanking('xp')">XP</button>
+    </div>
+
     <!-- プレイヤーランキング -->
     <section id="playerRanking" class="ranking-section">
       <h2>プレイヤー勝率ランキング</h2>

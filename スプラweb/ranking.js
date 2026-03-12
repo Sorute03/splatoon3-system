@@ -1,6 +1,7 @@
 const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
 const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
 
+
 let rankingData = null;
 let reportTargetId = "";
 let reportTargetName = "";
@@ -11,6 +12,11 @@ let sortState = {
   playerWeapon: { key: "winRate", asc: false },
   xp: { key: "xp", asc: false }
 };
+
+function getCurrentUserId() {
+  return localStorage.getItem("userId") || "";
+}
+
 
 async function initRankingPage() {
   await initSeasonDropdown();
@@ -326,4 +332,5 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+
 

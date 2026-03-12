@@ -40,6 +40,7 @@ async function loadUsers() {
     let buttons = "";
 
     if (isAdmin) {
+      // 管理者はすべての操作が可能
       buttons += `
         <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
           ${isBanned ? '解除' : 'BAN'}
@@ -49,6 +50,7 @@ async function loadUsers() {
         </button>
       `;
     } else if (isModerator) {
+      // モデレーターはBAN解除のみ
       if (isBanned) {
         buttons += `
           <button onclick="toggleBan('${user.UserID}', true)">
@@ -56,7 +58,6 @@ async function loadUsers() {
           </button>
         `;
       }
-      // BANされていないユーザーにはボタンを表示しない
     }
 
     div.innerHTML = `

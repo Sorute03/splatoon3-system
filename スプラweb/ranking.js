@@ -287,6 +287,8 @@ function openReport(userId, name) {
   document.getElementById("reportModal").style.display = "flex";
 }
 
+
+
 // 初期化トリガー
 window.addEventListener("DOMContentLoaded", () => {
   requireLogin();
@@ -340,6 +342,30 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+function showUserInfo() {
+  const userId = localStorage.getItem("userId");
+  const userName = localStorage.getItem("userName"); // ログイン時に保存してるなら
+
+  const container = document.createElement("div");
+  container.style.margin = "1em 0";
+  container.style.fontWeight = "bold";
+
+  if (userId) {
+    container.textContent = `ログイン中: ${userName || userId}`;
+  } else {
+    container.textContent = "ログインしていません";
+  }
+
+  // すでに表示済みなら上書き
+  const existing = document.getElementById("userInfo");
+  if (existing) {
+    existing.replaceWith(container);
+  } else {
+    container.id = "userInfo";
+    document.querySelector("main").prepend(container);
+  }
+}
+
 
 
 

@@ -342,6 +342,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
+
+
+
+
 function showUserInfo() {
   const userId = localStorage.getItem("userId");
   const userName = localStorage.getItem("userName"); // ログイン時に保存してるなら
@@ -365,6 +369,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

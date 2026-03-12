@@ -62,9 +62,16 @@ async function loadReports() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "getReports" })
   });
-  const reports = await res.json();
+  const result = await res.json();
+  const reports = result.reports; // ← ここを修正！
   const container = document.getElementById("reportList");
   container.innerHTML = "";
+
+  if (!Array.isArray(reports)) {
+    container.textContent = "通報情報の取得に失敗しました。";
+    console.error("reports is not an array:", reports);
+    return;
+  }
 
   reports.forEach(report => {
     const div = document.createElement("div");

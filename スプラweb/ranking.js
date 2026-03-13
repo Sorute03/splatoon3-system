@@ -96,7 +96,7 @@ async function loadRankingForSeason(seasonId) {
     const res = await fetch(API_URL, {
       method: "POST",
       body: JSON.stringify({
-        action: "getRankingData", // ← 修正済み！
+        mode: "getRankingData", // ← 修正済み！
         seasonId: seasonId
       }),
       headers: { "Content-Type": "application/json" }
@@ -401,6 +401,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

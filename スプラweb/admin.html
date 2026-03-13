@@ -86,7 +86,7 @@
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "getUserList" })
+          body: JSON.stringify({ mode: "getUserList" })
         });
     
         const result = await res.json();
@@ -150,7 +150,7 @@
         await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "banUser", userId, isBanned: newStatus })
+          body: JSON.stringify({ mode: "banUser", userId, isBanned: newStatus })
         });
         loadUsers();
       } catch (e) {
@@ -169,7 +169,7 @@
         await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "setModerator", userId, isModerator: newStatus })
+          body: JSON.stringify({ mode: "setModerator", userId, isModerator: newStatus })
         });
         loadUsers();
       } catch (e) {
@@ -182,7 +182,7 @@
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "getReports" })
+          body: JSON.stringify({ mode: "getReports" })
         });
 
         const result = await res.json();
@@ -221,7 +221,7 @@
         await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "markReportHandled", reportId, note })
+          body: JSON.stringify({ mode: "markReportHandled", reportId, note })
         });
         loadReports();
       } catch (e) {

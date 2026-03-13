@@ -83,7 +83,7 @@
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mode:action })
+      body: JSON.stringify({ mode: action })
     });
     return await res.json();
   }
@@ -93,6 +93,43 @@
     stageList = await fetchList("getStageList");
     updateMatchInputs();
   });
+
+  function getMatchCountKey(seasonId, rule) {
+    return `matchCount_${seasonId}_${rule}`;
+  }
+
+  function getMatchCount(seasonId, rule) {
+    return Number(localStorage.getItem(getMatchCountKey(seasonId, rule)) || 0);
+  }
+
+  function incrementMatchCount(seasonId, rule, count = 1) {
+    const key = getMatchCountKey(seasonId, rule);
+    const current = getMatchCount(seasonId, rule);
+    localStorage.setItem(key, current + count);
+  }
+
+  function getWinLoseKey(seasonId, rule) {
+    return `winLose_${seasonId}_${rule}`;
+  }
+
+  function getWinLoseCount(seasonId, rule) {
+    const raw = localStorage.getItem(getWinLoseKey(seasonId, rule));
+    try {
+      return raw ? JSON.parse(raw) : { win: 0, lose: 0 };
+    } catch {
+      return { win: 0, lose: 0 };
+    }
+  }
+
+  function incrementWinLoseCount(seasonId, rule, results) {
+    const key = getWinLoseKey(seasonId, rule);
+    const current = getWinLoseCount(seasonId, rule);
+    results.forEach(r => {
+      if (r === "win") current.win++;
+      if (r === "lose") current.lose++;
+    });
+    localStorage.setItem(key, JSON.stringify(current));
+  }
 
   function createMatchInput(index = null) {
     const container = document.createElement("div");
@@ -185,36 +222,35 @@
 
   function checkXPCondition() {
     const matchType = matchTypeSelect.value;
-    const mode = document.getElementById("xMatchMode").value;
-    if (matchType !== "xmatch" || mode !== "set") {
-      xpInput.style.display = "none";
-      xpField.required = false;
-      xpField.value = "";
-      return;
-    }
-  
+    const mode = document.getElementById("xMatchMode")?.value || "";
     const rule = ruleSelect.value;
     const seasonId = localStorage.getItem("currentSeasonId") || "Unknown";
     const matchCount = getMatchCount(seasonId, rule);
-  
-    let win = 0;
-    let lose = 0;
-    let filled = 0;
-  
-    for (let i = 0; i < 3; i++) {
-      const val = document.querySelector(`[name="result_${i}"]`)?.value;
-      if (val === "win") win++;
-      if (val === "lose") lose++;
-      if (val === "win" || val === "lose") filled++;
+    const winLose = getWinLoseCount(seasonId, rule);
+
+    let currentWins = 0;
+    let currentLoses = 0;
+
+    if (matchType === "xmatch" && mode === "set") {
+      for (let i = 0; i < 3; i++) {
+        const val = document.querySelector(`[name="result_${i}"]`)?.value;
+        if (val === "win") currentWins++;
+        if (val === "lose") currentLoses++;
+      }
+    } else {
+      const val = document.querySelector(`[name="result"]`)?.value;
+      if (val === "win") currentWins = 1;
+      if (val === "lose") currentLoses = 1;
     }
-  
+
+    const totalWins = winLose.win + currentWins;
+    const totalLoses = winLose.lose + currentLoses;
+
     if (matchCount < 5) {
-      // 最初の5試合までは常に表示、任意入力
       xpInput.style.display = "block";
       xpField.required = false;
     } else {
-      // 6試合目以降は3勝 or 3敗で表示＆必須、それ以外は非表示
-      if (win === 3 || lose === 3) {
+      if (totalWins >= 3 || totalLoses >= 3) {
         xpInput.style.display = "block";
         xpField.required = true;
       } else {
@@ -224,22 +260,6 @@
       }
     }
   }
-
-
-  function getMatchCountKey(seasonId, rule) {
-    return `matchCount_${seasonId}_${rule}`;
-  }
-
-  function getMatchCount(seasonId, rule) {
-    return Number(localStorage.getItem(getMatchCountKey(seasonId, rule)) || 0);
-  }
-  
-  function incrementMatchCount(seasonId, rule, count = 1) {
-    const key = getMatchCountKey(seasonId, rule);
-    const current = getMatchCount(seasonId, rule);
-    localStorage.setItem(key, current + count);
-  }
-
 
   matchTypeSelect.addEventListener("change", () => {
     const matchType = matchTypeSelect.value;
@@ -269,16 +289,25 @@
     const result = await res.json();
     return result.seasonId;
   }
-
+  
   document.getElementById("matchForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+  
+    // ✅ XP欄が表示されていて空欄なら確認ダイアログ
+    if (xpInput.style.display !== "none" && xpField.required && xpField.value.trim() === "") {
+      const confirmEmpty = confirm("XPが入力されていません。このまま登録してもよろしいですか？");
+      if (!confirmEmpty) {
+        return; // キャンセルされたら送信中止
+      }
+    }
+  
     const form = e.target;
     const msg = document.getElementById("matchMessage");
   
     const userId = localStorage.getItem("userId");
     const secretId = localStorage.getItem("secretId");
     const seasonId = await fetchSeasonId();
-    localStorage.setItem("currentSeasonId", seasonId); // ← ここで保存！
+    localStorage.setItem("currentSeasonId", seasonId);
     const rule = form.rule.value;
     const matchType = form.matchType.value;
     const mode = document.getElementById("xMatchMode").value;
@@ -344,12 +373,15 @@
       msg.style.color = "green";
       msg.textContent = "戦績を登録しました！";
   
-      // ✅ 試合数カウント（Xマッチsetモードのみ）
       if (matchType === "xmatch" && mode === "set") {
         incrementMatchCount(seasonId, rule, matches.length);
+        const results = matches.map(m => m.result);
+        incrementWinLoseCount(seasonId, rule, results);
+      } else {
+        incrementMatchCount(seasonId, rule, 1);
+        incrementWinLoseCount(seasonId, rule, [matches[0].result]);
       }
   
-      // ✅ XP入力があれば記録（任意）
       if (matches[matches.length - 1].xp !== "") {
         const key = `xpSubmitted_${seasonId}_${rule}`;
         localStorage.setItem(key, "true");
@@ -361,11 +393,11 @@
       msg.textContent = "一部の戦績登録に失敗しました";
     }
   });
-
+  
   document.getElementById("goToMyPage").addEventListener("click", () => {
     window.location.href = "mypage.html";
   });
-
+  
   document.getElementById("addAnother").addEventListener("click", () => {
     document.getElementById("matchForm").reset();
     document.getElementById("matchMessage").textContent = "";
@@ -374,6 +406,7 @@
     updateMatchInputs();
   });
 </script>
+
 </body>
 </html>
 

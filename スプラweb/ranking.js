@@ -25,6 +25,13 @@ function getCurrentUserId() {
   return localStorage.getItem("userId") || "";
 }
 
+function getMinValue(id, defaultValue = 0) {
+  const el = document.getElementById(id);
+  if (!el) return defaultValue;
+  const val = parseInt(el.value);
+  return isNaN(val) ? defaultValue : val;
+}
+
 
 async function initRankingPage() {
   await initSeasonDropdown();
@@ -378,6 +385,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

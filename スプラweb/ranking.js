@@ -106,129 +106,138 @@ function renderRankingTables() {
   if (!rankingData) return;
 
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
-  const matchTypeFilter = document.getElementById("matchTypeFilter").value;
-  const ruleFilter = document.getElementById("ruleFilter").value;
-  const key = `${ruleFilter || "ALL"}|${matchTypeFilter || "ALL"}`;
+  const matchTypeFilter = document.getElementById("matchTypeFilter")?.value || "ALL";
+  const ruleFilter = document.getElementById("ruleFilter")?.value || "ALL";
+  const key = `${ruleFilter}|${matchTypeFilter}`;
 
-  // プレイヤー勝率
-  const playerMin = getMinValue("playerMinGames", 5);
-  const playerNameFilter = document.getElementById("playerNameFilter").value.toLowerCase();
-  const playerLimit = getMinValue("playerLimitFilter", Infinity);
-  const playerBody = document.querySelector("#playerRankingTable tbody");
-  playerBody.innerHTML = "";
+  // プレイヤー勝率ランキング
+  if (document.getElementById("playerRanking").style.display !== "none") {
+    const playerMin = getMinValue("playerMinGames", 5);
+    const playerNameFilter = document.getElementById("playerNameFilter")?.value.toLowerCase() || "";
+    const playerLimit = getMinValue("playerLimitFilter", Infinity);
+    const playerBody = document.querySelector("#playerRankingTable tbody");
+    playerBody.innerHTML = "";
 
-  const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
+    const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
 
-  const playerSorted = [...playerSource]
-    .filter(p => p.total >= playerMin)
-    .filter(p => p.playerName.toLowerCase().includes(playerNameFilter))
-    .filter(p => {
-      const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === p.playerName);
-      return !xpEntry || xpEntry.xp >= globalXpMin;
-    })
-    .sort(sortBy(sortState.player.key, sortState.player.asc))
-    .slice(0, playerLimit);
+    const playerSorted = [...playerSource]
+      .filter(p => p.total >= playerMin)
+      .filter(p => p.playerName.toLowerCase().includes(playerNameFilter))
+      .filter(p => {
+        const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === p.playerName);
+        return !xpEntry || xpEntry.xp >= globalXpMin;
+      })
+      .sort(sortBy(sortState.player.key, sortState.player.asc))
+      .slice(0, playerLimit);
 
-  playerSorted.forEach((p, i) => {
-    const tr = document.createElement("tr");
-    const isSelf = p.userId === currentUserId; // userIdがある場合
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${p.playerName}</td>
-      <td>${(p.winRate * 100).toFixed(1)}%</td>
-      <td>${p.wins}</td>
-      <td>${p.total}</td>
-      <td>
-        ${!isSelf ? `<button onclick="openReport('${p.userId || p.playerName}', '${p.playerName}')">🚨 通報</button>` : ""}
-      </td>
-    `;
-    playerBody.appendChild(tr);
-  });
+    playerSorted.forEach((p, i) => {
+      const tr = document.createElement("tr");
+      const isSelf = p.userId === currentUserId;
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${p.playerName}</td>
+        <td>${(p.winRate * 100).toFixed(1)}%</td>
+        <td>${p.wins}</td>
+        <td>${p.total}</td>
+        <td>
+          ${!isSelf ? `<button onclick="openReport('${p.userId || p.playerName}', '${p.playerName}')">🚨 通報</button>` : ""}
+        </td>
+      `;
+      playerBody.appendChild(tr);
+    });
+  }
 
-  // 武器別勝率
-  const weaponMin = getMinValue("weaponMinGames", 5);
-  const weaponNameFilter = document.getElementById("weaponNameFilter").value.toLowerCase();
-  const weaponLimit = getMinValue("weaponLimitFilter", Infinity);
-  const weaponBody = document.querySelector("#weaponRankingTable tbody");
-  weaponBody.innerHTML = "";
+  // 武器別勝率ランキング
+  if (document.getElementById("weaponRanking").style.display !== "none") {
+    const weaponMin = getMinValue("weaponMinGames", 5);
+    const weaponNameFilter = document.getElementById("weaponNameFilter")?.value.toLowerCase() || "";
+    const weaponLimit = getMinValue("weaponLimitFilter", Infinity);
+    const weaponBody = document.querySelector("#weaponRankingTable tbody");
+    weaponBody.innerHTML = "";
 
-  const weaponSource = (rankingData.weaponRankingByRuleAndType || {})[key] || [];
+    const weaponSource = (rankingData.weaponRankingByRuleAndType || {})[key] || [];
 
-  const weaponSorted = [...weaponSource]
-    .filter(w => w.total >= weaponMin)
-    .filter(w => w.weapon.toLowerCase().includes(weaponNameFilter))
-    .sort(sortBy(sortState.weapon.key, sortState.weapon.asc))
-    .slice(0, weaponLimit);
+    const weaponSorted = [...weaponSource]
+      .filter(w => w.total >= weaponMin)
+      .filter(w => w.weapon.toLowerCase().includes(weaponNameFilter))
+      .sort(sortBy(sortState.weapon.key, sortState.weapon.asc))
+      .slice(0, weaponLimit);
 
-  weaponSorted.forEach((w, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${w.weapon}</td>
-      <td>${(w.winRate * 100).toFixed(1)}%</td>
-      <td>${w.wins}</td>
-      <td>${w.total}</td>
-    `;
-    weaponBody.appendChild(tr);
-  });
+    weaponSorted.forEach((w, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${w.weapon}</td>
+        <td>${(w.winRate * 100).toFixed(1)}%</td>
+        <td>${w.wins}</td>
+        <td>${w.total}</td>
+      `;
+      weaponBody.appendChild(tr);
+    });
+  }
 
-  // プレイヤー×武器別勝率
-  const pwMin = getMinValue("playerWeaponMinGames", 5);
-  const pwNameFilter = document.getElementById("playerWeaponNameFilter").value.toLowerCase();
-  const pwWeaponFilter = document.getElementById("playerWeaponWeaponFilter").value.toLowerCase();
-  const pwLimit = getMinValue("playerWeaponLimitFilter", Infinity);
-  const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
-  pwBody.innerHTML = "";
+  // プレイヤー×武器別勝率ランキング
+  if (document.getElementById("playerWeaponRanking").style.display !== "none") {
+    const pwMin = getMinValue("playerWeaponMinGames", 5);
+    const pwNameFilter = document.getElementById("playerWeaponNameFilter")?.value.toLowerCase() || "";
+    const pwWeaponFilter = document.getElementById("playerWeaponWeaponFilter")?.value.toLowerCase() || "";
+    const pwLimit = getMinValue("playerWeaponLimitFilter", Infinity);
+    const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
+    pwBody.innerHTML = "";
 
-  const pwSource = (rankingData.playerWeaponRankingByRuleAndType || {})[key] || [];
+    const pwSource = (rankingData.playerWeaponRankingByRuleAndType || {})[key] || [];
 
-  const pwSorted = [...pwSource]
-    .filter(pw => pw.total >= pwMin)
-    .filter(pw => pw.playerName.toLowerCase().includes(pwNameFilter))
-    .filter(pw => pw.weapon.toLowerCase().includes(pwWeaponFilter))
-    .filter(pw => {
-      const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === pw.playerName);
-      return !xpEntry || xpEntry.xp >= globalXpMin;
-    })
-    .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc))
-    .slice(0, pwLimit);
+    const pwSorted = [...pwSource]
+      .filter(pw => pw.total >= pwMin)
+      .filter(pw => pw.playerName.toLowerCase().includes(pwNameFilter))
+      .filter(pw => pw.weapon.toLowerCase().includes(pwWeaponFilter))
+      .filter(pw => {
+        const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === pw.playerName);
+        return !xpEntry || xpEntry.xp >= globalXpMin;
+      })
+      .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc))
+      .slice(0, pwLimit);
 
-  pwSorted.forEach((pw, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${pw.playerName}</td>
-      <td>${pw.weapon}</td>
-      <td>${(pw.winRate * 100).toFixed(1)}%</td>
-      <td>${pw.wins}</td>
-      <td>${pw.total}</td>
-    `;
-    pwBody.appendChild(tr);
-  });
+    pwSorted.forEach((pw, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${pw.playerName}</td>
+        <td>${pw.weapon}</td>
+        <td>${(pw.winRate * 100).toFixed(1)}%</td>
+        <td>${pw.wins}</td>
+        <td>${pw.total}</td>
+      `;
+      pwBody.appendChild(tr);
+    });
+  }
 
   // XPランキング
-  const xpMin = getMinValue("xpMinFilter", globalXpMin);
-  const xpNameFilter = document.getElementById("xpNameFilter").value.toLowerCase();
-  const xpLimit = getMinValue("xpLimitFilter", Infinity);
-  const xpBody = document.querySelector("#xpRankingTable tbody");
-  xpBody.innerHTML = "";
+  if (document.getElementById("xpRanking").style.display !== "none") {
+    const xpMin = getMinValue("xpMinFilter", globalXpMin);
+    const xpNameFilter = document.getElementById("xpNameFilter")?.value.toLowerCase() || "";
+    const xpLimit = getMinValue("xpLimitFilter", Infinity);
+    const xpBody = document.querySelector("#xpRankingTable tbody");
+    xpBody.innerHTML = "";
 
-  const xpSorted = [...(rankingData.xpRanking || [])]
-    .filter(entry => entry.xp >= xpMin)
-    .filter(entry => entry.playerName.toLowerCase().includes(xpNameFilter))
-    .sort(sortBy(sortState.xp.key, sortState.xp.asc))
-    .slice(0, xpLimit);
+    const xpSorted = [...(rankingData.xpRanking || [])]
+      .filter(entry => entry.xp >= xpMin)
+      .filter(entry => entry.playerName.toLowerCase().includes(xpNameFilter))
+      .sort(sortBy(sortState.xp.key, sortState.xp.asc))
+      .slice(0, xpLimit);
 
-  xpSorted.forEach((entry, i) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${entry.playerName}</td>
-            <td>${entry.xp}</td>
-    `;
-    xpBody.appendChild(tr);
-  });
+    xpSorted.forEach((entry, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${entry.playerName}</td>
+        <td>${entry.xp}</td>
+      `;
+      xpBody.appendChild(tr);
+    });
+  }
 }
+
 
 // ソート関数生成
 function sortBy(key, asc) {
@@ -369,6 +378,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

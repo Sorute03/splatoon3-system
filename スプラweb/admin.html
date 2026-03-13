@@ -56,6 +56,13 @@
     <h2>管理者ページ</h2>
     <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
 
+    <!-- 🔁 通報一覧を先に表示 -->
+    <section>
+      <h2>通報一覧</h2>
+      <div id="reportList"></div>
+    </section>
+
+    <!-- 🔁 ユーザー一覧を後に表示 -->
     <section>
       <h2>ユーザー一覧</h2>
       <table>
@@ -70,11 +77,6 @@
         </thead>
         <tbody id="userListBody"></tbody>
       </table>
-    </section>
-
-    <section>
-      <h2>通報一覧</h2>
-      <div id="reportList"></div>
     </section>
   </div>
 

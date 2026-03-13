@@ -31,7 +31,7 @@ async function login() {
 
   const form = new FormData();
   form.append("data", JSON.stringify({
-    action: "login",
+    mode: "login",
     userId,
     password
   }));
@@ -80,7 +80,7 @@ async function register() {
 
   const form = new FormData();
   form.append("data", JSON.stringify({
-    action: "register",
+    mode: "register",
     password,
     playerName,
     secretId
@@ -120,4 +120,5 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+
 

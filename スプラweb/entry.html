@@ -88,9 +88,41 @@
     return await res.json();
   }
 
+  async function fetchSeasonId() {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "getCurrentSeasonId" })
+    });
+    const result = await res.json();
+    return result.seasonId;
+  }
+
+  function checkSeasonChange(currentSeasonId) {
+    const lastSeasonId = localStorage.getItem("lastSeasonId");
+    if (lastSeasonId && lastSeasonId !== currentSeasonId) {
+      Object.keys(localStorage).forEach(key => {
+        if (
+          key.startsWith("matchCount_") ||
+          key.startsWith("winLose_") ||
+          key.startsWith("xpGiven_") ||
+          key.startsWith("xpSubmitted_")
+        ) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+    localStorage.setItem("lastSeasonId", currentSeasonId);
+  }
+
   window.addEventListener("DOMContentLoaded", async () => {
     weaponList = await fetchList("getWeaponList");
     stageList = await fetchList("getStageList");
+
+    const seasonId = await fetchSeasonId();
+    checkSeasonChange(seasonId);
+    localStorage.setItem("currentSeasonId", seasonId);
+
     updateMatchInputs();
   });
 
@@ -129,6 +161,18 @@
       if (r === "lose") current.lose++;
     });
     localStorage.setItem(key, JSON.stringify(current));
+  }
+
+  function getXPFlagKey(seasonId, rule) {
+    return `xpGiven_${seasonId}_${rule}`;
+  }
+
+  function hasGivenXP(seasonId, rule) {
+    return localStorage.getItem(getXPFlagKey(seasonId, rule)) === "true";
+  }
+
+  function setXPFlag(seasonId, rule) {
+    localStorage.setItem(getXPFlagKey(seasonId, rule), "true");
   }
 
   function createMatchInput(index = null) {
@@ -227,6 +271,7 @@
     const seasonId = localStorage.getItem("currentSeasonId") || "Unknown";
     const matchCount = getMatchCount(seasonId, rule);
     const winLose = getWinLoseCount(seasonId, rule);
+    const xpGiven = hasGivenXP(seasonId, rule);
 
     let currentWins = 0;
     let currentLoses = 0;
@@ -239,14 +284,16 @@
       }
     } else {
       const val = document.querySelector(`[name="result"]`)?.value;
-      if (val === "win") currentWins = 1;
+            if (val === "win") currentWins = 1;
       if (val === "lose") currentLoses = 1;
     }
 
     const totalWins = winLose.win + currentWins;
     const totalLoses = winLose.lose + currentLoses;
 
-    if (matchCount < 5) {
+    const treatAsPost5 = matchCount >= 5 || xpGiven;
+
+    if (!treatAsPost5) {
       xpInput.style.display = "block";
       xpField.required = false;
     } else {
@@ -280,40 +327,39 @@
 
   document.getElementById("xMatchMode").addEventListener("change", updateMatchInputs);
 
-  async function fetchSeasonId() {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getCurrentSeasonId" })
-    });
-    const result = await res.json();
-    return result.seasonId;
-  }
-  
   document.getElementById("matchForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-  
-    // ✅ XP欄が表示されていて空欄なら確認ダイアログ
-    if (xpInput.style.display !== "none" && xpField.required && xpField.value.trim() === "") {
-      const confirmEmpty = confirm("XPが入力されていません。このまま登録してもよろしいですか？");
-      if (!confirmEmpty) {
-        return; // キャンセルされたら送信中止
-      }
-    }
-  
+
     const form = e.target;
+    const matchType = matchTypeSelect.value;
+    const mode = document.getElementById("xMatchMode")?.value || "";
+    const rule = form.rule.value;
+    const xpValue = form.xp.value.trim();
+    const seasonId = await fetchSeasonId();
+    checkSeasonChange(seasonId);
+    localStorage.setItem("currentSeasonId", seasonId);
+
+    const isXPVisible = xpInput.style.display !== "none";
+    const isXPRequired = xpField.required;
+    const isFirstXP = xpValue !== "" && !hasGivenXP(seasonId, rule);
+
+    if (isXPVisible && isXPRequired && xpValue === "") {
+      const confirmEmpty = confirm("XPが入力されていません。このまま登録してもよろしいですか？");
+      if (!confirmEmpty) return;
+    }
+
+    if (isFirstXP) {
+      const confirmXP = confirm(`このXP「${xpValue}」で確定してもよろしいですか？（あとから変更できません）`);
+      if (!confirmXP) return;
+    }
+
     const msg = document.getElementById("matchMessage");
-  
+
     const userId = localStorage.getItem("userId");
     const secretId = localStorage.getItem("secretId");
-    const seasonId = await fetchSeasonId();
-    localStorage.setItem("currentSeasonId", seasonId);
-    const rule = form.rule.value;
-    const matchType = form.matchType.value;
-    const mode = document.getElementById("xMatchMode").value;
-  
+
     const matches = [];
-  
+
     if (matchType === "xmatch" && mode === "set") {
       for (let i = 0; i < 3; i++) {
         matches.push({
@@ -353,7 +399,7 @@
         xp: form.xp.value ? Number(form.xp.value) : ""
       });
     }
-  
+
     let successCount = 0;
     for (const match of matches) {
       try {
@@ -368,11 +414,11 @@
         console.error("送信エラー:", e);
       }
     }
-  
+
     if (successCount === matches.length) {
       msg.style.color = "green";
       msg.textContent = "戦績を登録しました！";
-  
+
       if (matchType === "xmatch" && mode === "set") {
         incrementMatchCount(seasonId, rule, matches.length);
         const results = matches.map(m => m.result);
@@ -381,23 +427,24 @@
         incrementMatchCount(seasonId, rule, 1);
         incrementWinLoseCount(seasonId, rule, [matches[0].result]);
       }
-  
+
       if (matches[matches.length - 1].xp !== "") {
         const key = `xpSubmitted_${seasonId}_${rule}`;
         localStorage.setItem(key, "true");
+        setXPFlag(seasonId, rule);
       }
-  
+
       document.getElementById("postSubmitOptions").style.display = "block";
     } else {
       msg.style.color = "red";
       msg.textContent = "一部の戦績登録に失敗しました";
     }
   });
-  
+
   document.getElementById("goToMyPage").addEventListener("click", () => {
     window.location.href = "mypage.html";
   });
-  
+
   document.getElementById("addAnother").addEventListener("click", () => {
     document.getElementById("matchForm").reset();
     document.getElementById("matchMessage").textContent = "";
@@ -406,6 +453,7 @@
     updateMatchInputs();
   });
 </script>
+
 
 </body>
 </html>

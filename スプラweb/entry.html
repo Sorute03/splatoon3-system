@@ -188,25 +188,58 @@
     const mode = document.getElementById("xMatchMode").value;
     if (matchType !== "xmatch" || mode !== "set") {
       xpInput.style.display = "none";
+      xpField.required = false;
       xpField.value = "";
       return;
     }
-
+  
+    const rule = ruleSelect.value;
+    const seasonId = localStorage.getItem("currentSeasonId") || "Unknown";
+    const matchCount = getMatchCount(seasonId, rule);
+  
     let win = 0;
     let lose = 0;
+    let filled = 0;
+  
     for (let i = 0; i < 3; i++) {
       const val = document.querySelector(`[name="result_${i}"]`)?.value;
       if (val === "win") win++;
       if (val === "lose") lose++;
+      if (val === "win" || val === "lose") filled++;
     }
-
-    if (win === 3 || lose === 3) {
+  
+    if (matchCount < 5) {
+      // 最初の5試合までは常に表示、任意入力
       xpInput.style.display = "block";
+      xpField.required = false;
     } else {
-      xpInput.style.display = "none";
-      xpField.value = "";
+      // 6試合目以降は3勝 or 3敗で表示＆必須、それ以外は非表示
+      if (win === 3 || lose === 3) {
+        xpInput.style.display = "block";
+        xpField.required = true;
+      } else {
+        xpInput.style.display = "none";
+        xpField.required = false;
+        xpField.value = "";
+      }
     }
   }
+
+
+  function getMatchCountKey(seasonId, rule) {
+    return `matchCount_${seasonId}_${rule}`;
+  }
+
+  function getMatchCount(seasonId, rule) {
+    return Number(localStorage.getItem(getMatchCountKey(seasonId, rule)) || 0);
+  }
+  
+  function incrementMatchCount(seasonId, rule, count = 1) {
+    const key = getMatchCountKey(seasonId, rule);
+    const current = getMatchCount(seasonId, rule);
+    localStorage.setItem(key, current + count);
+  }
+
 
   matchTypeSelect.addEventListener("change", () => {
     const matchType = matchTypeSelect.value;
@@ -241,16 +274,17 @@
     e.preventDefault();
     const form = e.target;
     const msg = document.getElementById("matchMessage");
-
+  
     const userId = localStorage.getItem("userId");
     const secretId = localStorage.getItem("secretId");
     const seasonId = await fetchSeasonId();
+    localStorage.setItem("currentSeasonId", seasonId); // ← ここで保存！
     const rule = form.rule.value;
     const matchType = form.matchType.value;
     const mode = document.getElementById("xMatchMode").value;
-
+  
     const matches = [];
-
+  
     if (matchType === "xmatch" && mode === "set") {
       for (let i = 0; i < 3; i++) {
         matches.push({
@@ -290,7 +324,7 @@
         xp: form.xp.value ? Number(form.xp.value) : ""
       });
     }
-
+  
     let successCount = 0;
     for (const match of matches) {
       try {
@@ -305,14 +339,22 @@
         console.error("送信エラー:", e);
       }
     }
-
+  
     if (successCount === matches.length) {
       msg.style.color = "green";
       msg.textContent = "戦績を登録しました！";
+  
+      // ✅ 試合数カウント（Xマッチsetモードのみ）
+      if (matchType === "xmatch" && mode === "set") {
+        incrementMatchCount(seasonId, rule, matches.length);
+      }
+  
+      // ✅ XP入力があれば記録（任意）
       if (matches[matches.length - 1].xp !== "") {
         const key = `xpSubmitted_${seasonId}_${rule}`;
         localStorage.setItem(key, "true");
       }
+  
       document.getElementById("postSubmitOptions").style.display = "block";
     } else {
       msg.style.color = "red";

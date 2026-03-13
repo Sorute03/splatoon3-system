@@ -96,7 +96,7 @@ async function loadRankingForSeason(seasonId) {
     const res = await fetch(API_URL, {
       method: "POST",
       body: JSON.stringify({
-        action: "getCachedRanking",
+        action: "getRankingData", // ← 修正済み！
         seasonId: seasonId
       }),
       headers: { "Content-Type": "application/json" }
@@ -115,6 +115,7 @@ async function loadRankingForSeason(seasonId) {
     alert("ランキングの読み込みに失敗しました：" + e.message);
   }
 }
+
 
 function getMinValue(id, fallback) {
   const val = parseInt(document.getElementById(id)?.value);
@@ -400,6 +401,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

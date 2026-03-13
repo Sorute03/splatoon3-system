@@ -33,6 +33,18 @@ function getMinValue(id, defaultValue = 0) {
 }
 
 
+function getTextValue(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.toLowerCase() : "";
+}
+
+function getSelectValue(id, defaultValue = "ALL") {
+  const el = document.getElementById(id);
+  return el ? el.value : defaultValue;
+}
+
+
+
 async function initRankingPage() {
   await initSeasonDropdown();
   setupSortableHeaders();
@@ -116,7 +128,8 @@ function renderRankingTables() {
   const matchTypeFilter = document.getElementById("matchTypeFilter")?.value || "ALL";
   const ruleFilter = document.getElementById("ruleFilter")?.value || "ALL";
   const key = `${ruleFilter}|${matchTypeFilter}`;
-
+  
+  
   // プレイヤー勝率ランキング
   if (document.getElementById("playerRanking").style.display !== "none") {
     const playerMin = getMinValue("playerMinGames", 5);
@@ -385,6 +398,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

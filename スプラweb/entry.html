@@ -83,7 +83,7 @@
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action })
+      body: JSON.stringify({ mode:action })
     });
     return await res.json();
   }
@@ -297,7 +297,7 @@
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "saveMatch", match })
+          body: JSON.stringify({ mode: "saveMatch", match })
         });
         const result = await res.json();
         if (result.status === "ok") successCount++;

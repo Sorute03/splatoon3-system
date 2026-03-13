@@ -123,6 +123,8 @@ function getMinValue(id, fallback) {
 
 function renderRankingTables() {
   if (!rankingData) return;
+  console.log("rankingData", rankingData);
+
 
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
   const matchTypeFilter = document.getElementById("matchTypeFilter")?.value || "ALL";
@@ -398,6 +400,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

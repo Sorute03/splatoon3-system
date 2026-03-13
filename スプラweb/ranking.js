@@ -56,7 +56,7 @@ async function initSeasonDropdown() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getRankingIndex" })
+      body: JSON.stringify({ mode: "getRankingIndex" })
     });
 
     const result = await res.json();
@@ -401,6 +401,7 @@ function showUserInfo() {
     document.querySelector("main").prepend(container);
   }
 }
+
 
 
 

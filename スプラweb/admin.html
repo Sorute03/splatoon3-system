@@ -6,7 +6,21 @@
   <style>
     body {
       font-family: sans-serif;
-      margin: 20px;
+      margin: 0;
+      display: flex;
+    }
+    #sidebar-container {
+      width: 200px;
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+      min-height: 100vh;
+    }
+    #main-content {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
     }
     .back-button {
       margin-bottom: 1em;
@@ -36,96 +50,110 @@
   </style>
 </head>
 <body>
-  <h2>管理者ページ</h2>
-  <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
+  <div id="sidebar-container"></div>
 
-  <section>
-    <h2>ユーザー一覧</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>プレイヤー名</th>
-          <th>ユーザーID</th>
-          <th>BAN</th>
-          <th>モデレーター</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="userListBody"></tbody>
-    </table>
-  </section>
+  <div id="main-content">
+    <h2>管理者ページ</h2>
+    <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
 
-  <section>
-    <h2>通報一覧</h2>
-    <div id="reportList"></div>
-  </section>
+    <section>
+      <h2>ユーザー一覧</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>プレイヤー名</th>
+            <th>ユーザーID</th>
+            <th>BAN</th>
+            <th>モデレーター</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="userListBody"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>通報一覧</h2>
+      <div id="reportList"></div>
+    </section>
+  </div>
 
   <script>
     const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
     async function loadUsers() {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "getUserList" })
-      });
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "getUserList" })
+        });
 
-      const result = await res.json();
-      const users = result.users;
-      const container = document.getElementById("userListBody");
-      container.innerHTML = "";
+        const result = await res.json();
+        const users = result.users;
+        const container = document.getElementById("userListBody");
+        container.innerHTML = "";
 
-      if (!Array.isArray(users)) {
-        container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
-        console.error("users is not an array:", users);
-        return;
-      }
-
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      const isModerator = localStorage.getItem("isModerator") === "true";
-
-      users.forEach(user => {
-        const tr = document.createElement("tr");
-        const isBanned = user.IsBanned === "TRUE";
-        const isMod = user.isModerator === "TRUE";
-
-        let buttons = "";
-
-        if (isAdmin) {
-          buttons += `
-            <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
-              ${isBanned ? '解除' : 'BAN'}
-            </button>
-            <button onclick="toggleMod('${user.UserID}', ${!isMod})">
-              ${isMod ? '解除' : 'モデレーターにする'}
-            </button>
-          `;
-        } else if (isModerator && isBanned) {
-          buttons += `
-            <button onclick="toggleBan('${user.UserID}', true)">
-              解除
-            </button>
-          `;
+        if (!Array.isArray(users)) {
+          container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+          console.error("users is not an array:", users);
+          return;
         }
 
-        tr.innerHTML = `
-          <td>${user.PlayerName}</td>
-          <td>${user.UserID}</td>
-          <td>${user.IsBanned}</td>
-          <td>${user.isModerator}</td>
-          <td>${buttons}</td>
-        `;
-        container.appendChild(tr);
-      });
+        const isAdmin = localStorage.getItem("isAdmin") === "true";
+        const isModerator = localStorage.getItem("isModerator") === "true";
+
+        users.forEach(user => {
+          const tr = document.createElement("tr");
+          const isBanned = user.IsBanned === "TRUE";
+          const isMod = user.isModerator === "TRUE";
+
+          let buttons = "";
+
+          if (isAdmin) {
+            buttons += `
+              <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
+                ${isBanned ? '解除' : 'BAN'}
+              </button>
+              <button onclick="toggleMod('${user.UserID}', ${!isMod})">
+                ${isMod ? '解除' : 'モデレーターにする'}
+              </button>
+            `;
+          } else if (isModerator && isBanned) {
+            buttons += `
+              <button onclick="toggleBan('${user.UserID}', false)">
+                解除
+              </button>
+            `;
+          }
+
+          tr.innerHTML = `
+            <td>${user.PlayerName}</td>
+            <td>${user.UserID}</td>
+            <td>${user.IsBanned}</td>
+            <td>${user.isModerator}</td>
+            <td>${buttons}</td>
+          `;
+          container.appendChild(tr);
+        });
+      } catch (e) {
+        console.error("ユーザー取得エラー:", e);
+        document.getElementById("userListBody").innerHTML =
+          "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+      }
     }
 
     async function toggleBan(userId, newStatus) {
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "banUser", userId, isBanned: newStatus })
-      });
-      loadUsers();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "banUser", userId, isBanned: newStatus })
+        });
+        loadUsers();
+      } catch (e) {
+        console.error("BAN切り替えエラー:", e);
+      }
     }
 
     async function toggleMod(userId, newStatus) {
@@ -135,56 +163,76 @@
         return;
       }
 
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "setModerator", userId, isModerator: newStatus })
-      });
-      loadUsers();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "setModerator", userId, isModerator: newStatus })
+        });
+        loadUsers();
+      } catch (e) {
+        console.error("モデレーター切り替えエラー:", e);
+      }
     }
 
     async function loadReports() {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "getReports" })
-      });
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "getReports" })
+        });
 
-      const result = await res.json();
-      const reports = result.reports;
-      const container = document.getElementById("reportList");
-      container.innerHTML = "";
+        const result = await res.json();
+        const reports = result.reports;
+        const container = document.getElementById("reportList");
+        container.innerHTML = "";
 
-      if (!Array.isArray(reports)) {
-        container.textContent = "通報情報の取得に失敗しました。";
-        console.error("reports is not an array:", reports);
-        return;
+        if (!Array.isArray(reports)) {
+          container.textContent = "通報情報の取得に失敗しました。";
+          console.error("reports is not an array:", reports);
+          return;
+        }
+
+        reports.forEach(report => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${report.reporterId}</strong> → <strong>${report.targetId}</strong><br>
+            理由: ${report.reason}<br>
+            日時: ${report.timestamp}<br>
+            状態: ${report.status}<br>
+            <textarea id="note-${report.reportId}" placeholder="対応メモ"></textarea>
+            <button onclick="handleReport('${report.reportId}')">対応済みにする</button>
+            <hr>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error("通報取得エラー:", e);
+        document.getElementById("reportList").textContent = "通報情報の取得に失敗しました。";
       }
-
-      reports.forEach(report => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <strong>${report.reporterId}</strong> → <strong>${report.targetId}</strong><br>
-          理由: ${report.reason}<br>
-          日時: ${report.timestamp}<br>
-          状態: ${report.status}<br>
-          <textarea id="note-${report.reportId}" placeholder="対応メモ"></textarea>
-          <button onclick="handleReport('${report.reportId}')">対応済みにする</button>
-          <hr>
-        `;
-        container.appendChild(div);
-      });
     }
 
     async function handleReport(reportId) {
       const note = document.getElementById(`note-${reportId}`).value;
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "markReportHandled", reportId, note })
-      });
-      loadReports();
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "markReportHandled", reportId, note })
+        });
+        loadReports();
+      } catch (e) {
+        console.error("通報処理エラー:", e);
+      }
     }
+
+    // サイドバー読み込み
+    fetch("sidebar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("sidebar-container").innerHTML = html;
+      });
 
     document.addEventListener("DOMContentLoaded", () => {
       loadUsers();

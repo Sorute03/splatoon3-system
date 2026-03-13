@@ -88,28 +88,30 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action: "getUserList" })
         });
-
+    
         const result = await res.json();
+        console.log("getUserList result:", result); // ← デバッグ用ログ
         const users = result.users;
+    
         const container = document.getElementById("userListBody");
         container.innerHTML = "";
-
+    
         if (!Array.isArray(users)) {
           container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
           console.error("users is not an array:", users);
           return;
         }
-
+    
         const isAdmin = localStorage.getItem("isAdmin") === "true";
         const isModerator = localStorage.getItem("isModerator") === "true";
-
+    
         users.forEach(user => {
           const tr = document.createElement("tr");
           const isBanned = user.IsBanned === "TRUE";
           const isMod = user.isModerator === "TRUE";
-
+    
           let buttons = "";
-
+    
           if (isAdmin) {
             buttons += `
               <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
@@ -126,7 +128,7 @@
               </button>
             `;
           }
-
+    
           tr.innerHTML = `
             <td>${user.PlayerName}</td>
             <td>${user.UserID}</td>
@@ -138,8 +140,8 @@
         });
       } catch (e) {
         console.error("ユーザー取得エラー:", e);
-        document.getElementById("userListBody").innerHTML =
-          "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+        const container = document.getElementById("userListBody");
+        container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
       }
     }
 

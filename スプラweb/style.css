@@ -1,28 +1,7 @@
-/* === Splatoon1 フォント読み込み === */
+/* === Splatoon風フォント（代替）読み込み === */
 @font-face {
-  font-family: 'Splatoon1Common';
-  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1-common.63115abb.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Splatoon1CJK';
-  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1-cjk-common.bdc10131.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Splatoon1JPKana';
-  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1JP-hiragana-katakana.f22d0d26.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Splatoon1JPLevel1';
-  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1JP-level1.3f19244c.woff2') format('woff2');
+  font-family: 'Ikamodoki';
+  src: url('./ikamodoki.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
@@ -41,7 +20,7 @@
 
 /* === 全体スタイル === */
 body {
-  font-family: 'Splatoon1Common', 'Splatoon1CJK', 'Splatoon1JPKana', 'Splatoon1JPLevel1', sans-serif;
+  font-family: 'Ikamodoki', sans-serif;
   margin: 0;
   display: flex;
   background: linear-gradient(135deg, var(--ink-black), var(--ink-gray));
@@ -105,6 +84,7 @@ input, select, textarea {
   border-radius: 6px;
   font-size: 1em;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 /* === メッセージ表示 === */

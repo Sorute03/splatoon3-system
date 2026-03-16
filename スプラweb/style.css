@@ -1,36 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka&display=swap');
+
+:root {
+  --ink-pink: #ff2d89;
+  --ink-green: #39ff14;
+  --ink-yellow: #ffe600;
+  --ink-blue: #00cfff;
+  --ink-purple: #a259ff;
+  --ink-black: #1a1a1a;
+  --ink-gray: #2c2c2c;
+  --ink-white: #fefefe;
+}
+
 body {
-  font-family: sans-serif;
+  font-family: 'Bungee', 'Fredoka', sans-serif;
   margin: 0;
   display: flex;
+  background: linear-gradient(135deg, var(--ink-black), var(--ink-gray));
+  color: var(--ink-white);
+  min-height: 100vh;
 }
 
 .sidebar {
-  width: 200px;
-  background: #f0f0f0;
-  padding: 1em;
+  width: 220px;
+  background: var(--ink-purple);
+  padding: 1.5em;
   height: 100vh;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .sidebar a {
   display: block;
-  margin: 0.5em 0;
+  margin: 1em 0;
   text-decoration: none;
-  color: #333;
+  color: var(--ink-white);
+  font-size: 1.1em;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar a:hover {
+  color: var(--ink-yellow);
+  transform: scale(1.05);
 }
 
 .main {
   flex: 1;
-  padding: 1em;
+  padding: 2em;
+  background: url('https://i.imgur.com/3ZQ3Z9N.png') repeat;
+  background-size: cover;
 }
 
 .message {
   margin-top: 1em;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1em;
+  border-left: 5px solid var(--ink-green);
+  border-radius: 5px;
 }
+
 .modal {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,12 +69,14 @@ body {
 }
 
 .modal-content {
-  background: white;
-  padding: 1.5em;
-  border-radius: 8px;
+  background: var(--ink-white);
+  color: var(--ink-black);
+  padding: 2em;
+  border-radius: 12px;
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   position: relative;
+  box-shadow: 0 0 20px var(--ink-pink);
 }
 
 .close {
@@ -52,6 +85,24 @@ body {
   right: 1em;
   font-size: 1.5em;
   cursor: pointer;
+  color: var(--ink-black);
 }
 
+button {
+  background-color: var(--ink-pink);
+  color: var(--ink-white);
+  border: none;
+  padding: 10px 20px;
+  font-family: 'Bungee', sans-serif;
+  font-size: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px #000;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
 
+button:hover {
+  transform: scale(1.05);
+  background-color: var(--ink-yellow);
+  color: var(--ink-black);
+}

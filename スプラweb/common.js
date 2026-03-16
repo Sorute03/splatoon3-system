@@ -121,3 +121,8 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+window.register = register;
+window.login = login;
+window.logout = logout;
+window.requireLogin = requireLogin;
+window.showUserInfo = showUserInfo;

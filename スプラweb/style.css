@@ -45,8 +45,18 @@ body {
 .main {
   flex: 1;
   padding: 2em;
-  background: url('https://i.imgur.com/3ZQ3Z9N.png') repeat;
+  position: relative;
+  z-index: 0;
+  background: url('https://copilot.microsoft.com/th/id/BCO.ab7ad7b8-6d07-4e24-a575-c63450a77833.png') no-repeat center center;
   background-size: cover;
+}
+
+.main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5); /* 半透明の黒で文字を読みやすく */
+  z-index: -1;
 }
 
 .message {
@@ -105,4 +115,13 @@ button:hover {
   transform: scale(1.05);
   background-color: var(--ink-yellow);
   color: var(--ink-black);
+}
+
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 0.5em 0;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
 }

@@ -464,11 +464,27 @@
       updateMatchInputs();
     });
   
-    fetch("sidebar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("sidebar-container").innerHTML = html;
-      });
+    document.addEventListener("DOMContentLoaded", async () => {
+      // ✅ sidebar.html を読み込んで挿入
+      try {
+        const sidebarRes = await fetch("sidebar.html");
+        const sidebarHtml = await sidebarRes.text();
+        document.getElementById("sidebar-container").innerHTML = sidebarHtml;
+      } catch (e) {
+        console.error("サイドバーの読み込みに失敗しました:", e);
+      }
+    
+      // ✅ ここから下は既存の初期化処理
+      weaponList = await fetchList("getWeaponList");
+      stageList = await fetchList("getStageList");
+    
+      const seasonId = await fetchSeasonId();
+      checkSeasonChange(seasonId);
+      localStorage.setItem("currentSeasonId", seasonId);
+    
+      updateMatchInputs();
+    });
+
   </script>
   
   

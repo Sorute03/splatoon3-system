@@ -179,12 +179,13 @@
     function createMatchInput(index = null) {
       const container = document.createElement("div");
       container.className = "match-block";
+    
       if (index !== null) {
         const title = document.createElement("h4");
         title.textContent = `第${index + 1}戦`;
         container.appendChild(title);
       }
-  
+    
       const fields = [
         { label: "ステージ", name: "stage", type: "select-stage", required: true },
         { label: "使用ブキ", name: "weapon", type: "select-weapon", required: true },
@@ -196,21 +197,26 @@
         { label: "勝敗", name: "result", type: "select-result", required: true },
         { label: "塗りポイント", name: "paintPoint", type: "number", required: true }
       ];
-  
+    
       fields.forEach(f => {
+        const group = document.createElement("div");
+        group.className = "form-group";
+    
         const label = document.createElement("label");
         label.textContent = f.label;
-  
+    
+        const fieldName = f.name + (index !== null ? `_${index}` : "");
+    
         if (f.type === "select-weapon" || f.type === "select-stage") {
           const select = document.createElement("select");
-          select.name = f.name + (index !== null ? `_${index}` : "");
+          select.name = fieldName;
           if (f.required) select.required = true;
-  
+    
           const defaultOption = document.createElement("option");
           defaultOption.value = "";
           defaultOption.textContent = "選択してください";
           select.appendChild(defaultOption);
-  
+    
           const list = f.type === "select-weapon" ? weaponList : stageList;
           list.forEach(item => {
             const option = document.createElement("option");
@@ -218,36 +224,40 @@
             option.textContent = item;
             select.appendChild(option);
           });
-  
-          label.appendChild(select);
+    
+          group.appendChild(label);
+          group.appendChild(select);
         } else if (f.type === "select-result") {
           const select = document.createElement("select");
-          select.name = f.name + (index !== null ? `_${index}` : "");
+          select.name = fieldName;
           if (f.required) select.required = true;
-  
+    
           ["", "win", "lose"].forEach(val => {
             const option = document.createElement("option");
             option.value = val;
             option.textContent = val === "win" ? "勝ち" : val === "lose" ? "負け" : "選択してください";
             select.appendChild(option);
           });
-  
+    
           select.addEventListener("change", checkXPCondition);
-          label.appendChild(select);
+          group.appendChild(label);
+          group.appendChild(select);
         } else {
           const input = document.createElement("input");
-          input.name = f.name + (index !== null ? `_${index}` : "");
+          input.name = fieldName;
           input.type = f.type || "text";
           if (f.required) input.required = true;
-          label.appendChild(input);
+          input.placeholder = f.label;
+          group.appendChild(label);
+          group.appendChild(input);
         }
-  
-        container.appendChild(label);
+    
+        container.appendChild(group);
       });
-  
+    
       return container;
     }
-  
+
     function updateMatchInputs() {
       const matchType = matchTypeSelect.value;
       const mode = document.getElementById("xMatchMode").value;

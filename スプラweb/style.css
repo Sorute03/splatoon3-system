@@ -1,5 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Fredoka&display=swap');
+/* === Splatoon1 フォント読み込み === */
+@font-face {
+  font-family: 'Splatoon1Common';
+  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1-common.63115abb.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
 
+@font-face {
+  font-family: 'Splatoon1CJK';
+  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1-cjk-common.bdc10131.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Splatoon1JPKana';
+  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1JP-hiragana-katakana.f22d0d26.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Splatoon1JPLevel1';
+  src: url('https://c.nintendo.com/splatoon3-tournament/_next/static/media/Splatoon1JP-level1.3f19244c.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* === カラーパレット === */
 :root {
   --ink-pink: #ff2d89;
   --ink-green: #39ff14;
@@ -11,8 +39,9 @@
   --ink-white: #fefefe;
 }
 
+/* === 全体スタイル === */
 body {
-  font-family: 'Bungee', 'Fredoka', sans-serif;
+  font-family: 'Splatoon1Common', 'Splatoon1CJK', 'Splatoon1JPKana', 'Splatoon1JPLevel1', sans-serif;
   margin: 0;
   display: flex;
   background: linear-gradient(135deg, var(--ink-black), var(--ink-gray));
@@ -20,6 +49,7 @@ body {
   min-height: 100vh;
 }
 
+/* === サイドバー === */
 .sidebar {
   width: 220px;
   background: var(--ink-purple);
@@ -42,6 +72,7 @@ body {
   transform: scale(1.05);
 }
 
+/* === メインコンテンツ === */
 .main {
   flex: 1;
   padding: 2em;
@@ -55,10 +86,28 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5); /* 半透明の黒で文字を読みやすく */
+  background: rgba(0, 0, 0, 0.5);
   z-index: -1;
 }
 
+/* === フォーム要素 === */
+label {
+  display: block;
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 0.5em;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+/* === メッセージ表示 === */
 .message {
   margin-top: 1em;
   background: rgba(255, 255, 255, 0.1);
@@ -67,6 +116,7 @@ body {
   border-radius: 5px;
 }
 
+/* === モーダル === */
 .modal {
   position: fixed;
   top: 0; left: 0;
@@ -98,13 +148,14 @@ body {
   color: var(--ink-black);
 }
 
+/* === ボタン === */
 button {
   background-color: var(--ink-pink);
   color: var(--ink-white);
   border: none;
   padding: 10px 20px;
-  font-family: 'Bungee', sans-serif;
   font-size: 16px;
+  font-family: inherit;
   border-radius: 8px;
   box-shadow: 0 4px #000;
   cursor: pointer;
@@ -117,11 +168,39 @@ button:hover {
   color: var(--ink-black);
 }
 
-input[type="password"] {
+/* === テーブル === */
+table {
+  border-collapse: collapse;
   width: 100%;
+  margin-top: 1em;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink-white);
+}
+
+th, td {
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 10px;
-  margin: 0.5em 0;
+  text-align: left;
+}
+
+th {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* === 戻るボタンなど === */
+.back-button {
+  margin-bottom: 1em;
+  padding: 8px 16px;
+  background-color: var(--ink-blue);
+  color: var(--ink-white);
   border: none;
   border-radius: 6px;
-  font-size: 1em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: var(--ink-yellow);
+  color: var(--ink-black);
 }

@@ -78,18 +78,18 @@ async function register() {
     return;
   }
 
-  const form = new FormData();
-  form.append("data", JSON.stringify({
-    mode: "register",
-    password,
-    playerName,
-    secretId
-  }));
-
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: form
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mode: "register",
+        password,
+        playerName,
+        secretId
+      })
     });
 
     const text = await res.text();
@@ -120,5 +120,3 @@ async function register() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
-
-

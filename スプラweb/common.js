@@ -29,17 +29,17 @@ async function login() {
   const password = document.getElementById("loginPassword").value.trim();
   const msg = document.getElementById("loginMessage");
 
-  const form = new FormData();
-  form.append("data", JSON.stringify({
-    mode: "login",
-    userId,
-    password
-  }));
-
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      body: form
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mode: "login",
+        userId,
+        password
+      })
     });
 
     const text = await res.text();
@@ -65,6 +65,7 @@ async function login() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+
 
 async function register() {
   const playerName = document.getElementById("regPlayerName").value.trim();

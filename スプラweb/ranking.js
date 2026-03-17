@@ -29,6 +29,7 @@ function getSelectValue(id, defaultValue = "") {
   return el ? el.value : defaultValue;
 }
 
+
 function getMultiSelectValues(id) {
   const select = document.getElementById(id);
   return Array.from(select.selectedOptions).map(opt => opt.value);

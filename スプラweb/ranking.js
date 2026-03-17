@@ -299,3 +299,31 @@ function showRanking(type) {
   const target = document.getElementById(`${type}Ranking`);
   if (target) target.style.display = "block";
 }
+
+function setupSortableHeaders() {
+  const headers = [
+    { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
+    { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
+    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
+    { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
+  ];
+
+  headers.forEach(({ table, type, keys }) => {
+    const ths = document.querySelectorAll(`#${table} thead th`);
+    ths.forEach((th, index) => {
+      if (index === 0) return; // 順位列は除外
+      th.style.cursor = "pointer";
+      th.addEventListener("click", () => {
+        const key = keys[index - 1];
+        if (sortState[type].key === key) {
+          sortState[type].asc = !sortState[type].asc;
+        } else {
+          sortState[type].key = key;
+          sortState[type].asc = false;
+        }
+        renderRankingTables();
+      });
+    });
+  });
+}
+

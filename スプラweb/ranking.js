@@ -81,13 +81,21 @@ async function initRankingPage() {
   await initSeasonDropdown();
   setupSortableHeaders();
 
-  [weaponDetails, weaponNames] = await Promise.all([
+  const [detailsRaw, namesRaw] = await Promise.all([
     fetchList("getWeaponDetails"),
     fetchList("getWeaponList")
   ]);
 
+  console.log("getWeaponDetails response:", detailsRaw);
+  console.log("getWeaponList response:", namesRaw);
+
+  // レスポンスが配列か、dataプロパティに入ってるかを確認して代入
+  weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : detailsRaw.data || [];
+  weaponNames = Array.isArray(namesRaw) ? namesRaw : namesRaw.data || [];
+
   populateWeaponFilters(weaponDetails, weaponNames);
 }
+
 
 function populateWeaponFilters(details, names) {
   console.log("weaponDetails", details);

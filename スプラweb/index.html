@@ -142,14 +142,14 @@
       const password = document.getElementById("loginPassword").value;
       const msg = document.getElementById("loginMessage");
       msg.textContent = "";
-
+  
       fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          action: "login",
+          mode: "login", // ← Workerがactionに変換！
           userId,
           password
         })
@@ -173,28 +173,28 @@
         msg.textContent = "通信エラー：" + err.message;
       });
     }
-
+  
     function toggleResetForm() {
       const section = document.getElementById("resetSection");
       section.style.display = section.style.display === "none" ? "block" : "none";
     }
-
+  
     document.getElementById("resetForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const form = e.target;
       const status = document.getElementById("resetStatus");
-
+  
       const userId = form.userId.value.trim();
       const secretId = form.secretId.value.trim();
       const newPassword = form.newPassword.value;
       const confirmPassword = form.confirmPassword.value;
-
+  
       if (newPassword !== confirmPassword) {
         status.style.color = "red";
         status.textContent = "新しいパスワードが一致しません。";
         return;
       }
-
+  
       try {
         const res = await fetch(API_URL, {
           method: "POST",
@@ -202,16 +202,16 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            action: "changePassword",
+            mode: "changePassword", // ← ここも mode！
             userId,
             secretId,
-            currentPassword: "",
+            currentPassword: "", // 現在のパスワードが不要なら空文字でOK
             newPassword
           })
         });
         const text = await res.text();
         const result = JSON.parse(text);
-
+  
         if (result.status === "ok") {
           status.style.color = "limegreen";
           status.textContent = "パスワードを再設定しました！ログインしてください。";
@@ -226,5 +226,6 @@
       }
     });
   </script>
+
 </body>
 </html>

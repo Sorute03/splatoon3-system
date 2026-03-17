@@ -38,6 +38,35 @@ function isAllSelected(values) {
   return values.length === 0 || values.includes("ALL");
 }
 
+async function initSeasonDropdown() {
+  const res = await fetch(window.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode: "getRankingIndex" })
+  });
+
+  const result = await res.json();
+  const index = Array.isArray(result) ? result : result.index || [];
+
+  const select = document.getElementById("seasonSelect");
+  index.forEach(season => {
+    const option = document.createElement("option");
+    option.value = season.seasonId;
+    option.textContent = season.name || season.seasonId;
+    select.appendChild(option);
+  });
+
+  if (index.length > 0) {
+    select.value = index[0].seasonId;
+    await loadRankingForSeason(index[0].seasonId);
+  }
+
+  select.addEventListener("change", async () => {
+    await loadRankingForSeason(select.value);
+  });
+}
+
+
 async function fetchList(action) {
   const res = await fetch(window.API_URL, {
     method: "POST",

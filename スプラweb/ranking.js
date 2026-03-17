@@ -1,5 +1,9 @@
 const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
 const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
+const userId = localStorage.getItem("userId");
+const secretId = localStorage.getItem("secretId");
+
+
 
 function requireLogin() {
   const userId = localStorage.getItem("userId");

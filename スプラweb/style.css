@@ -281,3 +281,24 @@ th {
     font-size: 15px;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1em;
+    box-shadow: none;
+    background: var(--ink-purple);
+  }
+
+  .sidebar a {
+    flex: 1 1 45%;
+    text-align: center;
+    margin: 0.5em;
+    font-size: 1em;
+  }
+}
+

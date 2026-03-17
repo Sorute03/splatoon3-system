@@ -20,12 +20,21 @@
 
     .main {
       width: 100%;
-      max-width: 600px;
+      max-width: 1000px; /* PCでは広めに */
+      margin: 0 auto;
       background: rgba(255, 255, 255, 0.05);
       padding: 2em;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
+
+/* スマホ用に狭くする */
+@media screen and (max-width: 768px) {
+  .main {
+    max-width: 100%;
+    padding: 1.5em;
+  }
+}
 
     h2 {
       text-align: center;

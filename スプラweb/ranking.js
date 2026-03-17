@@ -311,6 +311,7 @@ function showRanking(type) {
   if (target) target.style.display = "block";
 }
 
+
 function setupSortableHeaders() {
   const headers = [
     { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },

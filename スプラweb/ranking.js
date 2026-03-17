@@ -185,11 +185,11 @@ function renderRankingTables() {
     playerSorted.forEach((p, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${p.playerName}</td>
-        <td>${(p.winRate * 100).toFixed(1)}%</td>
-        <td>${p.wins}</td>
-        <td>${p.total}</td>
+        <td data-label="順位">${i + 1}</td>
+        <td data-label="プレイヤー名">${p.playerName}</td>
+        <td data-label="勝率">${(p.winRate * 100).toFixed(1)}%</td>
+        <td data-label="勝利数">${p.wins}</td>
+        <td data-label="試合数">${p.total}</td>
       `;
       playerBody.appendChild(tr);
     });
@@ -226,11 +226,11 @@ function renderRankingTables() {
     weaponSorted.forEach((w, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${w.weapon}</td>
-        <td>${(w.winRate * 100).toFixed(1)}%</td>
-        <td>${w.wins}</td>
-        <td>${w.total}</td>
+        <td data-label="順位">${i + 1}</td>
+        <td data-label="武器">${w.weapon}</td>
+        <td data-label="勝率">${(w.winRate * 100).toFixed(1)}%</td>
+        <td data-label="勝利数">${w.wins}</td>
+        <td data-label="試合数">${w.total}</td>
       `;
       weaponBody.appendChild(tr);
     });
@@ -275,16 +275,16 @@ function renderRankingTables() {
     pwSorted.forEach((pw, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${pw.playerName}</td>
-        <td>${pw.weapon}</td>
-        <td>${(pw.winRate * 100).toFixed(1)}%</td>
-        <td>${pw.wins}</td>
-        <td>${pw.total}</td>
-        <td>${pw.avgKills?.toFixed(2) ?? "-"}</td>
-        <td>${pw.avgDeaths?.toFixed(2) ?? "-"}</td>
-        <td>${pw.kdRatio === Infinity ? "∞" : pw.kdRatio?.toFixed(2) ?? "-"}</td>
-        <td>${pw.maxKills ?? "-"}</td>
+        <td data-label="順位">${i + 1}</td>
+        <td data-label="プレイヤー名">${pw.playerName}</td>
+        <td data-label="武器">${pw.weapon}</td>
+        <td data-label="勝率">${(pw.winRate * 100).toFixed(1)}%</td>
+        <td data-label="勝利数">${pw.wins}</td>
+        <td data-label="試合数">${pw.total}</td>
+        <td data-label="平均キル">${pw.avgKills?.toFixed(2) ?? "-"}</td>
+        <td data-label="平均デス">${pw.avgDeaths?.toFixed(2) ?? "-"}</td>
+        <td data-label="K/D比">${pw.kdRatio === Infinity ? "∞" : pw.kdRatio?.toFixed(2) ?? "-"}</td>
+        <td data-label="最高キル">${pw.maxKills ?? "-"}</td>
       `;
       pwBody.appendChild(tr);
     });
@@ -306,9 +306,9 @@ function renderRankingTables() {
     xpSorted.forEach((x, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${x.playerName}</td>
-        <td>${x.xp}</td>
+        <td data-label="順位">${i + 1}</td>
+        <td data-label="プレイヤー名">${x.playerName}</td>
+        <td data-label="XP">${x.xp}</td>
       `;
       xpBody.appendChild(tr);
     });

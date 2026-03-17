@@ -5,17 +5,19 @@
   <title>管理者ページ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script> <!-- ✅ ログイン・権限チェック用 -->
 </head>
-<body>
+<body onload="requireLogin(); showUserInfo(); checkAdminAccess();">
   <div class="sidebar">
-    <a href="mypage.html">マイページ</a>
-    <a href="entry.html">戦績登録</a>
-    <a href="ranking.html">ランキング</a>
-    <a href="admin.html">管理者ページ</a>
-    <a href="index.html">ログアウト</a>
+    <a href="mypage.html">🏠 マイページ</a>
+    <a href="entry.html">📝 戦績登録</a>
+    <a href="ranking.html">📊 ランキング</a>
+    <a href="admin.html">🛠 管理者ページ</a>
+    <a href="#" onclick="logout()">🚪 ログアウト</a>
   </div>
 
-  <div class="main">
+  <!-- 管理者・モデレーター用の本体 -->
+  <div class="main" id="adminContent" style="display:none;">
     <h2>管理者ページ</h2>
     <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
 
@@ -40,6 +42,14 @@
       </table>
     </section>
   </div>
+
+  <!-- 権限なしユーザー用の表示 -->
+  <div class="main" id="noAccess" style="display:none;">
+    <h2>権限がありません</h2>
+    <p>このページは管理者またはモデレーターのみアクセスできます。</p>
+    <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
+  </div>
+
 
   <script>
     const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";

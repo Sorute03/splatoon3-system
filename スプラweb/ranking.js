@@ -90,6 +90,9 @@ async function initRankingPage() {
 }
 
 function populateWeaponFilters(details, names) {
+  console.log("weaponDetails", details);
+  console.log("weaponNames", names);
+
   const categories = [...new Set(details.map(w => w.category))].sort();
   const subGenres = [...new Set(details.map(w => w.subgenre))].sort();
   const types = [...new Set(details.map(w => w.type))].sort();

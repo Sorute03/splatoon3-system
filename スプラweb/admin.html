@@ -181,6 +181,16 @@
         document.getElementById("reportList").textContent = "通報情報の取得に失敗しました。";
       }
     }
+    function checkAdminAccess() {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const isModerator = localStorage.getItem("isModerator") === "true";
+  
+      if (isAdmin || isModerator) {
+        document.getElementById("adminContent").style.display = "block";
+      } else {
+        document.getElementById("noAccess").style.display = "block";
+      }
+    }
 
     async function handleReport(reportId) {
       const note = document.getElementById(`note-${reportId}`).value;
@@ -200,6 +210,7 @@
       loadUsers();
       loadReports();
     });
+    
   </script>
 </body>
 </html>

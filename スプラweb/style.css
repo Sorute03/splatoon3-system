@@ -186,3 +186,98 @@ th {
   background-color: var(--ink-yellow);
   color: var(--ink-black);
 }
+
+
+/* === スマホ対応（レスポンシブ） === */
+@media screen and (max-width: 768px) {
+  body {
+    flex-direction: column;
+    font-size: 14px;
+    padding: 0;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1em;
+    box-shadow: none;
+  }
+
+  .main {
+    padding: 1em;
+    background-position: center top;
+  }
+
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .filters label {
+    font-size: 14px;
+  }
+
+  .ranking-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  .ranking-tabs button {
+    flex: 1 1 45%;
+    font-size: 14px;
+  }
+
+  table {
+    font-size: 13px;
+    overflow-x: auto;
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  table, tbody, tr, td {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    margin-bottom: 1em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5em;
+    border-radius: 8px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: var(--ink-yellow);
+    margin-right: 1em;
+    flex-shrink: 0;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1em;
+  }
+
+  button {
+    width: 100%;
+    font-size: 15px;
+  }
+}

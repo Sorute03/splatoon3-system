@@ -5,16 +5,17 @@
   <title>戦績登録</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script> <!-- ← 追加！ -->
+  <script src="entry.js" defer></script> <!-- ← 必要ならここで読み込む -->
 </head>
-<body>
+<body onload="requireLogin(); showUserInfo();">
   <div class="sidebar">
-    <a href="mypage.html">マイページ</a>
-    <a href="entry.html">戦績登録</a>
-    <a href="ranking.html">ランキング</a>
-    <a href="admin.html">管理者ページ</a>
-    <a href="logout.html">ログアウト</a>
+    <a href="mypage.html">🏠 マイページ</a>
+    <a href="entry.html">📝 戦績登録</a>
+    <a href="ranking.html">📊 ランキング</a>
+    <a href="admin.html" id="adminLink" style="display:none;">🛠 管理者ページ</a>
+    <a href="#" onclick="logout()">🚪 ログアウト</a>
   </div>
-
   <div class="main">
     <h2>戦績登録</h2>
 

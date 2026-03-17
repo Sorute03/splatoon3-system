@@ -1,18 +1,4 @@
-const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/"; // ← あなたのWeb AppのURLに置き換えてね
-const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得する関数（別途実装）
-const userId = localStorage.getItem("userId");
-const secretId = localStorage.getItem("secretId");
-
-
-
-function requireLogin() {
-  const userId = localStorage.getItem("userId");
-  if (!userId) {
-    alert("ログインが必要です！");
-    window.location.href = "login.html"; // ← ログインページのURLに合わせてね
-  }
-}
-
+const currentUserId = getCurrentUserId(); // ログイン中のユーザーIDを取得
 
 let rankingData = null;
 let reportTargetId = "";
@@ -36,7 +22,6 @@ function getMinValue(id, defaultValue = 0) {
   return isNaN(val) ? defaultValue : val;
 }
 
-
 function getTextValue(id) {
   const el = document.getElementById(id);
   return el ? el.value.toLowerCase() : "";
@@ -47,8 +32,6 @@ function getSelectValue(id, defaultValue = "ALL") {
   return el ? el.value : defaultValue;
 }
 
-
-
 async function initRankingPage() {
   await initSeasonDropdown();
   setupSortableHeaders();
@@ -57,7 +40,7 @@ async function initRankingPage() {
 // シーズン一覧を取得してドロップダウンに反映
 async function initSeasonDropdown() {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(window.API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode: "getRankingIndex" })
@@ -97,10 +80,10 @@ async function initSeasonDropdown() {
 // 指定シーズンのランキングを取得
 async function loadRankingForSeason(seasonId) {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(window.API_URL, {
       method: "POST",
       body: JSON.stringify({
-        mode: "getRankingData", // ← 修正済み！
+        mode: "getRankingData",
         seasonId: seasonId
       }),
       headers: { "Content-Type": "application/json" }
@@ -120,27 +103,18 @@ async function loadRankingForSeason(seasonId) {
   }
 }
 
-
-function getMinValue(id, fallback) {
-  const val = parseInt(document.getElementById(id)?.value);
-  return isNaN(val) ? fallback : val;
-}
-
 function renderRankingTables() {
   if (!rankingData) return;
-  console.log("rankingData", rankingData);
-
 
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
-  const matchTypeFilter = document.getElementById("matchTypeFilter")?.value || "ALL";
-  const ruleFilter = document.getElementById("ruleFilter")?.value || "ALL";
+  const matchTypeFilter = getSelectValue("matchTypeFilter", "ALL");
+  const ruleFilter = getSelectValue("ruleFilter", "ALL");
   const key = `${ruleFilter}|${matchTypeFilter}`;
-  
-  
+
   // プレイヤー勝率ランキング
   if (document.getElementById("playerRanking").style.display !== "none") {
     const playerMin = getMinValue("playerMinGames", 5);
-    const playerNameFilter = document.getElementById("playerNameFilter")?.value.toLowerCase() || "";
+    const playerNameFilter = getTextValue("playerNameFilter");
     const playerLimit = getMinValue("playerLimitFilter", Infinity);
     const playerBody = document.querySelector("#playerRankingTable tbody");
     playerBody.innerHTML = "";
@@ -177,7 +151,7 @@ function renderRankingTables() {
   // 武器別勝率ランキング
   if (document.getElementById("weaponRanking").style.display !== "none") {
     const weaponMin = getMinValue("weaponMinGames", 5);
-    const weaponNameFilter = document.getElementById("weaponNameFilter")?.value.toLowerCase() || "";
+    const weaponNameFilter = getTextValue("weaponNameFilter");
     const weaponLimit = getMinValue("weaponLimitFilter", Infinity);
     const weaponBody = document.querySelector("#weaponRankingTable tbody");
     weaponBody.innerHTML = "";
@@ -206,8 +180,8 @@ function renderRankingTables() {
   // プレイヤー×武器別勝率ランキング
   if (document.getElementById("playerWeaponRanking").style.display !== "none") {
     const pwMin = getMinValue("playerWeaponMinGames", 5);
-    const pwNameFilter = document.getElementById("playerWeaponNameFilter")?.value.toLowerCase() || "";
-    const pwWeaponFilter = document.getElementById("playerWeaponWeaponFilter")?.value.toLowerCase() || "";
+    const pwNameFilter = getTextValue("playerWeaponNameFilter");
+    const pwWeaponFilter = getTextValue("playerWeaponWeaponFilter");
     const pwLimit = getMinValue("playerWeaponLimitFilter", Infinity);
     const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
     pwBody.innerHTML = "";
@@ -242,7 +216,7 @@ function renderRankingTables() {
   // XPランキング
   if (document.getElementById("xpRanking").style.display !== "none") {
     const xpMin = getMinValue("xpMinFilter", globalXpMin);
-    const xpNameFilter = document.getElementById("xpNameFilter")?.value.toLowerCase() || "";
+    const xpNameFilter = getTextValue("xpNameFilter");
     const xpLimit = getMinValue("xpLimitFilter", Infinity);
     const xpBody = document.querySelector("#xpRankingTable tbody");
     xpBody.innerHTML = "";
@@ -264,7 +238,6 @@ function renderRankingTables() {
     });
   }
 }
-
 
 // ソート関数生成
 function sortBy(key, asc) {
@@ -323,13 +296,11 @@ function openReport(userId, name) {
   document.getElementById("reportModal").style.display = "flex";
 }
 
-
-
 // 初期化トリガー
 window.addEventListener("DOMContentLoaded", () => {
   requireLogin();
   initRankingPage();
-  showUserInfo();
+  showUserInfo(); // ← common.js の関数
 
   // 通報モーダルのイベント設定
   document.getElementById("closeReportModal").onclick = () => {
@@ -349,7 +320,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const timestamp = new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(window.API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -378,44 +349,3 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 });
-
-
-
-
-function showUserInfo() {
-  const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName"); // ログイン時に保存してるなら
-
-  const container = document.createElement("div");
-  container.style.margin = "1em 0";
-  container.style.fontWeight = "bold";
-
-  if (userId) {
-    container.textContent = `ログイン中: ${userName || userId}`;
-  } else {
-    container.textContent = "ログインしていません";
-  }
-
-  // すでに表示済みなら上書き
-  const existing = document.getElementById("userInfo");
-  if (existing) {
-    existing.replaceWith(container);
-  } else {
-    container.id = "userInfo";
-    document.querySelector("main").prepend(container);
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-

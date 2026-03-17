@@ -29,7 +29,6 @@ function getSelectValue(id, defaultValue = "") {
   return el ? el.value : defaultValue;
 }
 
-
 function getMultiSelectValues(id) {
   const select = document.getElementById(id);
   return Array.from(select.selectedOptions).map(opt => opt.value);
@@ -38,35 +37,6 @@ function getMultiSelectValues(id) {
 function isAllSelected(values) {
   return values.length === 0 || values.includes("ALL");
 }
-
-async function initSeasonDropdown() {
-  const res = await fetch(window.API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mode: "getRankingIndex" })
-  });
-
-  const result = await res.json();
-  const index = Array.isArray(result) ? result : result.index || [];
-
-  const select = document.getElementById("seasonSelect");
-  index.forEach(season => {
-    const option = document.createElement("option");
-    option.value = season.seasonId;
-    option.textContent = season.name || season.seasonId;
-    select.appendChild(option);
-  });
-
-  if (index.length > 0) {
-    select.value = index[0].seasonId;
-    await loadRankingForSeason(index[0].seasonId);
-  }
-
-  select.addEventListener("change", async () => {
-    await loadRankingForSeason(select.value);
-  });
-}
-
 
 async function fetchList(action) {
   const res = await fetch(window.API_URL, {
@@ -86,21 +56,13 @@ async function initRankingPage() {
     fetchList("getWeaponList")
   ]);
 
-  console.log("getWeaponDetails response:", detailsRaw);
-  console.log("getWeaponList response:", namesRaw);
-
-  // レスポンスが配列か、dataプロパティに入ってるかを確認して代入
   weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : detailsRaw.data || [];
   weaponNames = Array.isArray(namesRaw) ? namesRaw : namesRaw.data || [];
 
   populateWeaponFilters(weaponDetails, weaponNames);
 }
 
-
 function populateWeaponFilters(details, names) {
-  console.log("weaponDetails", details);
-  console.log("weaponNames", names);
-
   const categories = [...new Set(details.map(w => w.category))].sort();
   const subGenres = [...new Set(details.map(w => w.subgenre))].sort();
   const types = [...new Set(details.map(w => w.type))].sort();
@@ -199,7 +161,39 @@ function renderRankingTables() {
   const key = `${ruleFilter}|${matchTypeFilter}`;
   const globalXpMin = getMinValue("globalXpMinFilter", 0);
 
-  // プレイヤーランキング（省略）
+  // プレイヤーランキング
+  if (document.getElementById("playerRanking").style.display !== "none") {
+    const playerMin = getMinValue("playerMinGames", 5);
+    const playerLimit = getMinValue("playerLimitFilter", Infinity);
+    const playerNameFilter = getTextValue("playerNameFilter");
+
+    const playerBody = document.querySelector("#playerRankingTable tbody");
+    playerBody.innerHTML = "";
+
+    const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
+
+    const playerSorted = [...playerSource]
+      .filter(p => p.total >= playerMin)
+      .filter(p => p.playerName.toLowerCase().includes(playerNameFilter))
+      .filter(p => {
+        const xpEntry = (rankingData.xpRanking || []).find(x => x.playerName === p.playerName);
+        return !xpEntry || xpEntry.xp >= globalXpMin;
+      })
+      .sort(sortBy(sortState.player.key, sortState.player.asc))
+      .slice(0, playerLimit);
+
+    playerSorted.forEach((p, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${p.playerName}</td>
+        <td>${(p.winRate * 100).toFixed(1)}%</td>
+        <td>${p.wins}</td>
+        <td>${p.total}</td>
+      `;
+      playerBody.appendChild(tr);
+    });
+  }
 
   // 武器ランキング
   if (document.getElementById("weaponRanking").style.display !== "none") {
@@ -256,7 +250,7 @@ function renderRankingTables() {
     const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
     pwBody.innerHTML = "";
 
-    const pwSource = (rankingData.playerWeaponRankingByRuleAndType || {})[key] || [];
+    const pwSource = (rankingData.playerWeaponRankingByGroup || {})["ALL|ALL|ALL|ALL|ALL"] || [];
 
     const pwSorted = [...pwSource]
       .filter(pw => pw.total >= pwMin)
@@ -268,7 +262,7 @@ function renderRankingTables() {
         const nameMatch = isAllSelected(pwSelectedNames) || pwSelectedNames.includes(pw.weapon.toLowerCase());
         const typeMatch = isAllSelected(pwSelectedTypes) || pwSelectedTypes.includes(info.type);
         const categoryMatch = !pwSelectedCategory || info.category === pwSelectedCategory;
-                const subGenreMatch = !pwSelectedSubGenre || info.subgenre === pwSelectedSubGenre;
+        const subGenreMatch = !pwSelectedSubGenre || info.subgenre === pwSelectedSubGenre;
         return nameMatch && typeMatch && categoryMatch && subGenreMatch;
       })
       .filter(pw => {
@@ -287,13 +281,40 @@ function renderRankingTables() {
         <td>${(pw.winRate * 100).toFixed(1)}%</td>
         <td>${pw.wins}</td>
         <td>${pw.total}</td>
+        <td>${pw.avgKills?.toFixed(2) ?? "-"}</td>
+        <td>${pw.avgDeaths?.toFixed(2) ?? "-"}</td>
+        <td>${pw.kdRatio === Infinity ? "∞" : pw.kdRatio?.toFixed(2) ?? "-"}</td>
+        <td>${pw.maxKills ?? "-"}</td>
       `;
       pwBody.appendChild(tr);
     });
   }
 
-  // XPランキング（省略）
+  // XPランキング
+  if (document.getElementById("xpRanking").style.display !== "none") {
+    const xpLimit = getMinValue("xpLimitFilter", Infinity);
+    const xpNameFilter = getTextValue("xpNameFilter");
+
+    const xpBody = document.querySelector("#xpRankingTable tbody");
+    xpBody.innerHTML = "";
+
+    const xpSorted = [...(rankingData.xpRanking || [])]
+      .filter(x => x.playerName.toLowerCase().includes(xpNameFilter))
+      .sort(sortBy(sortState.xp.key, sortState.xp.asc))
+      .slice(0, xpLimit);
+
+    xpSorted.forEach((x, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${x.playerName}</td>
+        <td>${x.xp}</td>
+      `;
+      xpBody.appendChild(tr);
+    });
+  }
 }
+
 
 function sortBy(key, asc) {
   return (a, b) => {
@@ -311,19 +332,25 @@ function showRanking(type) {
   if (target) target.style.display = "block";
 }
 
-
 function setupSortableHeaders() {
   const headers = [
+    {
+      table: "playerWeaponRankingTable",
+      type: "playerWeapon",
+      keys: [
+        "playerName", "weapon", "winRate", "wins", "total",
+        "avgKills", "avgDeaths", "kdRatio", "maxKills"
+      ]
+    },
     { table: "playerRankingTable", type: "player", keys: ["playerName", "winRate", "wins", "total"] },
     { table: "weaponRankingTable", type: "weapon", keys: ["weapon", "winRate", "wins", "total"] },
-    { table: "playerWeaponRankingTable", type: "playerWeapon", keys: ["playerName", "weapon", "winRate", "wins", "total"] },
     { table: "xpRankingTable", type: "xp", keys: ["playerName", "xp"] }
   ];
 
   headers.forEach(({ table, type, keys }) => {
     const ths = document.querySelectorAll(`#${table} thead th`);
     ths.forEach((th, index) => {
-      if (index === 0) return; // 順位列は除外
+      if (index === 0) return;
       th.style.cursor = "pointer";
       th.addEventListener("click", () => {
         const key = keys[index - 1];
@@ -338,4 +365,68 @@ function setupSortableHeaders() {
     });
   });
 }
+
+function enrichWeaponRankingWithDetails(rankingList, weaponDetails) {
+  const detailMap = {};
+  weaponDetails.forEach(detail => {
+    detailMap[detail.weaponName] = detail;
+  });
+
+  rankingList.forEach(entry => {
+    const detail = detailMap[entry.weapon];
+    if (detail) {
+      entry.category = detail.category || "";
+      entry.subgenre = detail.subgenre || "";
+      entry.type = detail.type || "";
+    } else {
+      entry.category = "";
+      entry.subgenre = "";
+      entry.type = "";
+    }
+  });
+}
+
+function getWeaponNamesByPattern(weaponDetails, filters) {
+  return weaponDetails
+    .filter(w => {
+      return (
+        (!filters.type || w.type === filters.type) &&
+        (!filters.category || w.category === filters.category) &&
+        (!filters.subgenre || w.subgenre === filters.subgenre)
+      );
+    })
+    .map(w => w.weaponName);
+}
+
+function filterMatches(matches, weaponDetails, filters) {
+  const weaponMap = {};
+  weaponDetails.forEach(w => {
+    weaponMap[w.weaponName] = w;
+  });
+
+  let weaponNameSet = null;
+
+  if (filters.weapon) {
+    weaponNameSet = new Set([filters.weapon]);
+  } else if (filters.type || filters.category || filters.subgenre) {
+    const matchedNames = getWeaponNamesByPattern(weaponDetails, filters);
+    weaponNameSet = new Set(matchedNames);
+  }
+
+  return matches.filter(m => {
+    const detail = weaponMap[m.weapon];
+    if (!detail) return false;
+
+    const xp = m.xp || 0;
+
+    return (
+      (!weaponNameSet || weaponNameSet.has(m.weapon)) &&
+      (!filters.seasonId || filters.seasonId === "ALL" || m.seasonId === filters.seasonId) &&
+      (!filters.matchType || filters.matchType === "ALL" || m.matchType === filters.matchType) &&
+      (!filters.rule || filters.rule === "ALL" || m.rule === filters.rule) &&
+      (!filters.minXp || xp >= filters.minXp)
+    );
+  });
+}
+
 

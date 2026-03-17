@@ -85,11 +85,20 @@
     <section id="weaponRanking" class="ranking-section" style="display:none;">
       <h2>武器別勝率ランキング</h2>
       <div class="filters">
+        <label>ジャンル:</label>
+        <select id="filterCategory"></select>
+
+        <label>サブジャンル:</label>
+        <select id="filterSubGenre"></select>
+
+        <label>系統（複数選択可）:</label>
+        <select id="filterTypes" multiple size="5"></select>
+
+        <label>武器名（複数選択可）:</label>
+        <select id="filterWeaponNames" multiple size="8"></select>
+
         <label>最小試合数:
           <input type="number" id="weaponMinGames" value="5" min="0" />
-        </label>
-        <label>武器名フィルター:
-          <input type="text" id="weaponNameFilter" placeholder="武器名で検索" />
         </label>
         <label>表示件数:
           <input type="number" id="weaponLimitFilter" value="100" min="1" />
@@ -114,14 +123,28 @@
     <section id="playerWeaponRanking" class="ranking-section" style="display:none;">
       <h2>プレイヤー×武器別勝率ランキング</h2>
       <div class="filters">
-        <label>最小試合数:
-          <input type="number" id="playerWeaponMinGames" value="5" min="0" />
-        </label>
         <label>プレイヤー名フィルター:
           <input type="text" id="playerWeaponNameFilter" placeholder="名前で検索" />
         </label>
-        <label>武器名フィルター:
+
+        <label>武器名フィルター（部分一致）:
           <input type="text" id="playerWeaponWeaponFilter" placeholder="武器名で検索" />
+        </label>
+
+        <label>ジャンル:</label>
+        <select id="pwFilterCategory"></select>
+
+        <label>サブジャンル:</label>
+        <select id="pwFilterSubGenre"></select>
+
+        <label>系統（複数選択可）:</label>
+        <select id="pwFilterTypes" multiple size="5"></select>
+
+        <label>武器名（複数選択可）:</label>
+        <select id="pwFilterWeaponNames" multiple size="8"></select>
+
+        <label>最小試合数:
+          <input type="number" id="playerWeaponMinGames" value="5" min="0" />
         </label>
         <label>表示件数:
           <input type="number" id="playerWeaponLimitFilter" value="100" min="1" />
@@ -184,14 +207,16 @@
     </div>
   </div>
 
+  <!-- サイドバー読み込み -->
   <script>
-    // サイドバー読み込み
     fetch("sidebar.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("sidebar-container").innerHTML = html;
       });
   </script>
+
+  <!-- ランキングスクリプト -->
   <script src="ranking.js"></script>
 </body>
 </html>

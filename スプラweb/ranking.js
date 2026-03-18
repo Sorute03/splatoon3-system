@@ -9,6 +9,7 @@ let sortState = {
   xp: { key: "xp", asc: false }
 };
 
+
 const sortOptionsByType = {
   player: [
     { value: "winRate", label: "勝率" },

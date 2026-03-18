@@ -130,6 +130,21 @@ async function register() {
   }
 }
 
+function loadSidebar() {
+  fetch("sidebar.html")
+    .then(res => res.text())
+    .then(html => {
+      const container = document.getElementById("sidebar-container");
+      if (container) {
+        container.innerHTML = html;
+      }
+    })
+    .catch(err => {
+      console.error("サイドバーの読み込みに失敗しました:", err);
+    });
+}
+
+
 // グローバル公開
 window.requireLogin = requireLogin;
 window.logout = logout;

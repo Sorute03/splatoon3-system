@@ -6,7 +6,26 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'KanjiFont';
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/kanji.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
+@font-face {
+  font-family: 'LatinFont';
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/latin.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ExtraFont';
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/extra.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* === カラーパレット === */
 :root {
@@ -22,7 +41,7 @@
 
 /* === 全体スタイル === */
 body {
-  font-family: 'Ikamodoki', sans-serif;
+  font-family: 'Ikamodoki', 'KanjiFont', 'LatinFont', 'ExtraFont', sans-serif;
   margin: 0;
   display: flex;
   background: linear-gradient(135deg, var(--ink-black), var(--ink-gray));
@@ -187,7 +206,6 @@ th {
   color: var(--ink-black);
 }
 
-
 /* === スマホ対応（レスポンシブ） === */
 @media screen and (max-width: 768px) {
   body {
@@ -204,6 +222,14 @@ th {
     justify-content: center;
     padding: 1em;
     box-shadow: none;
+    background: var(--ink-purple);
+  }
+
+  .sidebar a {
+    flex: 1 1 45%;
+    text-align: center;
+    margin: 0.5em;
+    font-size: 1em;
   }
 
   .main {
@@ -281,24 +307,3 @@ th {
     font-size: 15px;
   }
 }
-
-@media screen and (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 1em;
-    box-shadow: none;
-    background: var(--ink-purple);
-  }
-
-  .sidebar a {
-    flex: 1 1 45%;
-    text-align: center;
-    margin: 0.5em;
-    font-size: 1em;
-  }
-}
-

@@ -39,6 +39,13 @@
       </select>
     </div>
 
+    <!-- 並び替えセレクター -->
+    <div class="filters" id="sortSelectorContainer" style="margin-bottom: 1em;">
+      <label>並び替え基準:
+        <select id="sortKeySelect"></select>
+      </label>
+    </div>
+
     <div id="lastUpdated"></div>
 
     <!-- ランキング切り替えボタン -->
@@ -49,24 +56,9 @@
       <button onclick="showRanking('xp')">XP</button>
     </div>
 
-    <!-- プレイヤーランキング -->
+    <!-- 各ランキングセクション（省略せずに必要に応じて追加） -->
     <section id="playerRanking" class="ranking-section">
       <h2>プレイヤー勝率ランキング</h2>
-      <div class="filters">
-        <label>最小試合数:
-          <input type="number" id="playerMinGames" value="5" min="0" />
-        </label>
-        <label>プレイヤー名フィルター:
-          <input type="text" id="playerNameFilter" placeholder="名前で検索" />
-        </label>
-        <label>最小XP:
-          <input type="number" id="globalXpMinFilter" value="0" min="0" />
-        </label>
-        <label>表示件数:
-          <input type="number" id="playerLimitFilter" value="100" min="1" />
-        </label>
-        <button onclick="renderRankingTables()">フィルター適用</button>
-      </div>
       <table id="playerRankingTable">
         <thead>
           <tr>
@@ -77,36 +69,12 @@
             <th>試合数</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- JavaScriptで data-label を付けて生成されます -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </section>
 
-    <!-- 武器ランキング -->
     <section id="weaponRanking" class="ranking-section" style="display:none;">
       <h2>武器別勝率ランキング</h2>
-      <div class="filters">
-        <label>ジャンル:</label>
-        <select id="filterCategory"></select>
-
-        <label>サブジャンル:</label>
-        <select id="filterSubGenre"></select>
-
-        <label>系統（複数選択可）:</label>
-        <select id="filterTypes" multiple size="5"></select>
-
-        <label>武器名（複数選択可）:</label>
-        <select id="filterWeaponNames" multiple size="8"></select>
-
-        <label>最小試合数:
-          <input type="number" id="weaponMinGames" value="5" min="0" />
-        </label>
-        <label>表示件数:
-          <input type="number" id="weaponLimitFilter" value="100" min="1" />
-        </label>
-        <button onclick="renderRankingTables()">フィルター適用</button>
-      </div>
       <table id="weaponRankingTable">
         <thead>
           <tr>
@@ -117,43 +85,12 @@
             <th>試合数</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- JavaScriptで data-label を付けて生成されます -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </section>
-        <!-- プレイヤー×武器ランキング -->
+
     <section id="playerWeaponRanking" class="ranking-section" style="display:none;">
       <h2>プレイヤー×武器別勝率ランキング</h2>
-      <div class="filters">
-        <label>プレイヤー名フィルター:
-          <input type="text" id="playerWeaponNameFilter" placeholder="名前で検索" />
-        </label>
-
-        <label>武器名フィルター（部分一致）:
-          <input type="text" id="playerWeaponWeaponFilter" placeholder="武器名で検索" />
-        </label>
-
-        <label>ジャンル:</label>
-        <select id="pwFilterCategory"></select>
-
-        <label>サブジャンル:</label>
-        <select id="pwFilterSubGenre"></select>
-
-        <label>系統（複数選択可）:</label>
-        <select id="pwFilterTypes" multiple size="5"></select>
-
-        <label>武器名（複数選択可）:</label>
-        <select id="pwFilterWeaponNames" multiple size="8"></select>
-
-        <label>最小試合数:
-          <input type="number" id="playerWeaponMinGames" value="5" min="0" />
-        </label>
-        <label>表示件数:
-          <input type="number" id="playerWeaponLimitFilter" value="100" min="1" />
-        </label>
-        <button onclick="renderRankingTables()">フィルター適用</button>
-      </div>
       <table id="playerWeaponRankingTable">
         <thead>
           <tr>
@@ -169,27 +106,12 @@
             <th>最高キル</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- JavaScriptで data-label を付けて生成されます -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </section>
 
-    <!-- XPランキング -->
     <section id="xpRanking" class="ranking-section" style="display:none;">
       <h2>XPランキング</h2>
-      <div class="filters">
-        <label>最小XP:
-          <input type="number" id="xpMinFilter" value="0" min="0" />
-        </label>
-        <label>プレイヤー名フィルター:
-          <input type="text" id="xpNameFilter" placeholder="名前で検索" />
-        </label>
-        <label>表示件数:
-          <input type="number" id="xpLimitFilter" value="100" min="1" />
-        </label>
-        <button onclick="renderRankingTables()">フィルター適用</button>
-      </div>
       <table id="xpRankingTable">
         <thead>
           <tr>
@@ -198,36 +120,11 @@
             <th>XP</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- JavaScriptで data-label を付けて生成されます -->
-        </tbody>
+        <tbody></tbody>
       </table>
     </section>
   </main>
 
-  <!-- 通報モーダル -->
-  <div id="reportModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span id="closeReportModal" class="close">&times;</span>
-      <h2>通報フォーム</h2>
-      <p id="reportTarget"></p>
-      <textarea id="reportReason" placeholder="通報理由を入力してください" rows="4" style="width:100%;"></textarea><br>
-      <input type="text" id="reportEvidence" placeholder="証拠画像のURL（任意）" style="width:100%;" /><br><br>
-      <button id="submitReportBtn">通報を送信</button>
-      <div id="reportStatus" style="margin-top: 0.5em; color: red;"></div>
-    </div>
-  </div>
-
-  <!-- サイドバー読み込み -->
-  <script>
-    fetch("sidebar.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("sidebar-container").innerHTML = html;
-      });
-  </script>
-
-  <!-- ランキングスクリプト -->
   <script src="ranking.js"></script>
 </body>
 </html>

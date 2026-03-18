@@ -56,7 +56,39 @@
       <button onclick="showRanking('xp')">XP</button>
     </div>
 
-    <!-- 各ランキングセクション（省略せずに必要に応じて追加） -->
+    <!-- 武器ランキング用フィルター -->
+    <div class="filters" id="weaponFilters">
+      <label>カテゴリ:
+        <select id="filterCategory"></select>
+      </label>
+      <label>サブジャンル:
+        <select id="filterSubGenre"></select>
+      </label>
+      <label>タイプ:
+        <select id="filterTypes" multiple></select>
+      </label>
+      <label>武器名:
+        <select id="filterWeaponNames" multiple></select>
+      </label>
+    </div>
+
+    <!-- プレイヤー×武器ランキング用フィルター -->
+    <div class="filters" id="playerWeaponFilters">
+      <label>カテゴリ:
+        <select id="pwFilterCategory"></select>
+      </label>
+      <label>サブジャンル:
+        <select id="pwFilterSubGenre"></select>
+      </label>
+      <label>タイプ:
+        <select id="pwFilterTypes" multiple></select>
+      </label>
+      <label>武器名:
+        <select id="pwFilterWeaponNames" multiple></select>
+      </label>
+    </div>
+
+    <!-- 各ランキングセクション -->
     <section id="playerRanking" class="ranking-section">
       <h2>プレイヤー勝率ランキング</h2>
       <table id="playerRankingTable">

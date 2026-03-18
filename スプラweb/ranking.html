@@ -72,6 +72,7 @@
         <label>最低XP:
           <input type="number" id="globalXpMinFilter" value="0" min="0" />
         </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
       <table id="playerRankingTable">
         <thead>
@@ -109,6 +110,7 @@
         <label>武器名:
           <select id="filterWeaponNames" multiple></select>
         </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
       <table id="weaponRankingTable">
         <thead>
@@ -155,6 +157,7 @@
         <label>武器名:
           <select id="pwFilterWeaponNames" multiple></select>
         </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
       <table id="playerWeaponRankingTable">
         <thead>
@@ -185,6 +188,7 @@
         <label>プレイヤー名フィルター:
           <input type="text" id="xpNameFilter" />
         </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
       <table id="xpRankingTable">
         <thead>

@@ -1,4 +1,4 @@
-/* === Splatoon風フォント（代替）読み込み === */
+/* === Splatoon風フォント（合成）読み込み === */
 @font-face {
   font-family: 'Ikamodoki';
   src: url('https://sorute-api.haruto-mori0602.workers.dev/ikamodoki.ttf') format('truetype');
@@ -8,21 +8,21 @@
 
 @font-face {
   font-family: 'KanjiFont';
-  src: url('https://sorute-api.haruto-mori0602.workers.dev/kanji.ttf') format('truetype');
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/kanji.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'LatinFont';
-  src: url('https://sorute-api.haruto-mori0602.workers.dev/latin.ttf') format('truetype');
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/latin.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'ExtraFont';
-  src: url('https://sorute-api.haruto-mori0602.workers.dev/extra.ttf') format('truetype');
+  src: url('https://sorute-api.haruto-mori0602.workers.dev/extra.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }

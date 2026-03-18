@@ -270,6 +270,59 @@ async function loadRankingForSeason(seasonId) {
     rankingData.updatedAt ? `最終更新: ${new Date(rankingData.updatedAt).toLocaleString()}` : "";
 }
 
+function populateWeaponFilters(details, names) {
+  const categories = [...new Set(details.map(w => w.category).filter(Boolean))];
+  const subGenres = [...new Set(details.map(w => w.subgenre).filter(Boolean))];
+  const types = [...new Set(details.map(w => w.type).filter(Boolean))];
+
+  fillSelect("filterCategory", categories);
+  fillSelect("filterSubGenre", subGenres);
+  fillMultiSelect("filterTypes", types);
+  fillMultiSelect("filterWeaponNames", names.sort());
+
+  fillSelect("pwFilterCategory", categories);
+  fillSelect("pwFilterSubGenre", subGenres);
+  fillMultiSelect("pwFilterTypes", types);
+  fillMultiSelect("pwFilterWeaponNames", names.sort());
+}
+
+function fillSelect(id, items) {
+  const select = document.getElementById(id);
+  if (!select) return;
+  select.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "ALL";
+  allOption.textContent = "すべて";
+  select.appendChild(allOption);
+
+  items.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item;
+    option.textContent = item;
+    select.appendChild(option);
+  });
+}
+
+function fillMultiSelect(id, items) {
+  const select = document.getElementById(id);
+  if (!select) return;
+  select.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "ALL";
+  allOption.textContent = "すべて";
+  select.appendChild(allOption);
+
+  items.forEach(item => {
+    const option = document.createElement("option");
+    option.value = item;
+    option.textContent = item;
+    select.appendChild(option);
+  });
+}
+
+
 function renderRankingTables() {
   if (!rankingData) return;
 

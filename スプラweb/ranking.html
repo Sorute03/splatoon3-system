@@ -215,12 +215,14 @@
     </section>
 
   </main>
-  <script src="ranking.js"></script>
   <script>
-    requireLogin();
-    showUserInfo();
-    loadSidebar();
-    initRankingPage();
+    document.addEventListener("DOMContentLoaded", () => {
+      requireLogin();
+      showUserInfo();
+      loadSidebar();
+      initRankingPage();
+    });
   </script>
+  <script src="ranking.js"></script>
 </body>
 </html>

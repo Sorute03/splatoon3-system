@@ -359,3 +359,4 @@ function renderRankingTables() {
       xpBody.appendChild(tr);
     });
   }
+}

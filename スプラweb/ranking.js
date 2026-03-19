@@ -310,7 +310,9 @@ async function fetchFilteredRanking(filters) {
     const data = await response.json();
 
     // 🔍 デバッグ情報をログ出力
+    console.log("🐛 フルレスポンス:", data);
     console.log("🐛 デバッグ情報:", data.debug);
+
 
     return data;
   } catch (error) {

@@ -179,8 +179,8 @@ async function initRankingPage() {
     fetchList("getWeaponList")
   ]);
 
-  weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : detailsRaw.data || [];
-  weaponNames = Array.isArray(namesRaw) ? namesRaw : namesRaw.data || [];
+  weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : [];
+  weaponNames = Array.isArray(namesRaw) ? namesRaw : [];
 
   populateWeaponFilters(weaponDetails, weaponNames);
 

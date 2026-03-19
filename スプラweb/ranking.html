@@ -194,6 +194,12 @@
         <label>プレイヤー名フィルター:
           <input type="text" id="xpNameFilter" />
         </label>
+        <label>XPの種類:
+          <select id="xpValueTypeSelect">
+            <option value="xp">現在のXP</option>
+            <option value="maxXp">最高XP</option>
+          </select>
+        </label>
         <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
       <table id="xpRankingTable">
@@ -204,9 +210,10 @@
             <th>XP</th>
           </tr>
         </thead>
-      <tbody></tbody>
+        <tbody></tbody>
       </table>
     </section>
+
   </main>
 
   <script src="ranking.js"></script>

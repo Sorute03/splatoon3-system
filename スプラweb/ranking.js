@@ -182,7 +182,7 @@ async function initRankingPage() {
   weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : [];
   weaponNames = Array.isArray(namesRaw) ? namesRaw : [];
 
-  populateWeaponFilters(weaponDetails, weaponNames);
+  // populateWeaponFilters(weaponDetails, weaponNames); ← 不要なら削除！
 
   document.getElementById("sortKeySelect").addEventListener("change", () => {
     renderRankingTables();

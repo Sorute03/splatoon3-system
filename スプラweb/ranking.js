@@ -232,8 +232,9 @@ function sortBy(key, asc) {
 }
 
 function populateWeaponFilters(details, names) {
+  // 武器名セレクター
   const weaponSelects = [
-    "weaponFilterWeaponNames", // ← ユニークなIDにしてね！
+    "weaponFilterWeaponNames",
     "pwFilterWeaponNames"
   ];
 
@@ -241,7 +242,6 @@ function populateWeaponFilters(details, names) {
     const select = document.getElementById(id);
     if (!select) return;
     select.innerHTML = "";
-
     names.forEach(name => {
       const option = document.createElement("option");
       option.value = name;
@@ -249,7 +249,41 @@ function populateWeaponFilters(details, names) {
       select.appendChild(option);
     });
   });
+
+  // カテゴリ・サブジャンル・タイプのユニーク値を抽出
+  const categories = [...new Set(details.map(w => w.category).filter(Boolean))];
+  const subgenres = [...new Set(details.map(w => w.subgenre).filter(Boolean))];
+  const types = [...new Set(details.map(w => w.type).filter(Boolean))];
+
+  // セレクターに反映するヘルパー
+  function populateSelect(id, values, allowAll = true) {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = "";
+    if (allowAll) {
+      const opt = document.createElement("option");
+      opt.value = "ALL";
+      opt.textContent = "すべて";
+      select.appendChild(opt);
+    }
+    values.forEach(v => {
+      const option = document.createElement("option");
+      option.value = v;
+      option.textContent = v;
+      select.appendChild(option);
+    });
+  }
+
+  // 各セレクターに反映
+  populateSelect("weaponFilterCategory", categories);
+  populateSelect("weaponFilterSubGenre", subgenres);
+  populateSelect("weaponFilterTypes", types, false);
+
+  populateSelect("pwFilterCategory", categories);
+  populateSelect("pwFilterSubGenre", subgenres);
+  populateSelect("pwFilterTypes", types, false);
 }
+
 
 
 function renderRankingTables() {

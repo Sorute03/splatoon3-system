@@ -292,53 +292,30 @@ function populateWeaponFilters(details, names) {
 }
 
 
-async function fetchFilteredRanking() {
-  const filters = {
-    seasonId: getSelectValue("seasonSelect", "ALL"),
-    rule: getSelectValue("ruleFilter", "ALL"),
-    matchType: getSelectValue("matchTypeFilter", "ALL"),
-    playerNameFilter: getTextValue("playerNameFilter"),
-    minXp: getMinValue("playerXpMinFilter", 0),
-    weaponNames: getMultiSelectValues("weaponFilterWeaponNames"),
-    category: [getSelectValue("weaponFilterCategory")].filter(v => v && v !== "ALL"),
-    subgenre: [getSelectValue("weaponFilterSubGenre")].filter(v => v && v !== "ALL"),
-    type: getMultiSelectValues("weaponFilterTypes")
+async function fetchFilteredRanking(filters) {
+  const payload = {
+    mode: "getFilteredRanking",
+    action: "getFilteredRanking",
+    filters,
+    token: "super-secret-token-123"
   };
 
-  console.log("🔍 送信するフィルター条件:", filters);
-
   try {
-    const res = await fetch(window.API_URL, {
+    const response = await fetch("https://sorute-api.haruto-mori0602.workers.dev/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mode: "getFilteredRanking",
-        action: "getFilteredRanking",
-        token: window.AUTH_TOKEN,
-        filters
-      })
+      body: JSON.stringify(payload)
     });
 
-    const result = await res.json();
-    console.log("📥 受信したランキングデータ:", result);
+    const data = await response.json();
 
-    if (result.error) {
-      console.error("❌ サーバーエラー:", result.error);
-      alert("ランキングデータの取得に失敗しました: " + result.error);
-      return;
-    }
+    // 🔍 デバッグ情報をログ出力
+    console.log("🐛 デバッグ情報:", data.debug);
 
-    // データを反映して再描画
-    rankingData = result;
-    renderRankingTables();
-
-    // 更新日時を表示（あれば）
-    document.getElementById("lastUpdated").textContent =
-      result.updatedAt ? `最終更新: ${new Date(result.updatedAt).toLocaleString()}` : "";
-
-  } catch (err) {
-    console.error("❌ 通信エラー:", err);
-    alert("ランキングデータの取得中にエラーが発生しました");
+    return data;
+  } catch (error) {
+    console.error("❌ fetchFilteredRanking エラー:", error);
+    return { error: "データの取得に失敗しました" };
   }
 }
 

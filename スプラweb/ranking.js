@@ -182,7 +182,7 @@ async function initRankingPage() {
   weaponDetails = Array.isArray(detailsRaw) ? detailsRaw : [];
   weaponNames = Array.isArray(namesRaw) ? namesRaw : [];
 
-  // populateWeaponFilters(weaponDetails, weaponNames); ← 不要なら削除！
+  populateWeaponFilters(weaponDetails, weaponNames); // ← ここでセレクターに反映！
 
   document.getElementById("sortKeySelect").addEventListener("change", () => {
     renderRankingTables();
@@ -230,6 +230,27 @@ function sortBy(key, asc) {
     return 0;
   };
 }
+
+function populateWeaponFilters(details, names) {
+  const weaponSelects = [
+    "weaponFilterWeaponNames", // ← ユニークなIDにしてね！
+    "pwFilterWeaponNames"
+  ];
+
+  weaponSelects.forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    select.innerHTML = "";
+
+    names.forEach(name => {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      select.appendChild(option);
+    });
+  });
+}
+
 
 function renderRankingTables() {
   if (!rankingData) return;

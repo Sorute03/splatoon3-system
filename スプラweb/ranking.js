@@ -321,6 +321,38 @@ async function fetchFilteredRanking(filters) {
   }
 }
 
+document.getElementById("filterButton").addEventListener("click", async () => {
+  const filters = {
+    rankingType: getSelectValue("rankingTypeSelect", "player"), // ← 必要に応じて変更
+    rule: getSelectValue("ruleFilter", "ALL"),
+    matchType: getSelectValue("matchTypeFilter", "ALL"),
+    minGamesPlayer: getMinValue("minGamesPlayer", 5),
+    minGamesWeapon: getMinValue("minGamesWeapon", 5),
+    minGamesPlayerWeapon: getMinValue("minGamesPlayerWeapon", 5),
+    minGamesXp: getMinValue("minGamesXp", 0),
+    sortKey: getSelectValue("sortKeySelect", "winRate"),
+    sortAsc: getSelectValue("sortOrderSelect", "desc") === "asc",
+    playerNameFilter: getTextValue("playerNameFilter"),
+    weaponNames: getMultiSelectValues("weaponFilterWeaponNames"),
+    type: getMultiSelectValues("weaponFilterTypes"),
+    category: getMultiSelectValues("weaponFilterCategory"),
+    subgenre: getMultiSelectValues("weaponFilterSubGenre"),
+    minXp: getMinValue("minXp", 0),
+    seasonId: getSelectValue("seasonSelect", "ALL")
+  };
+
+  console.log("📤 送信する filters:", filters);
+
+  const result = await fetchFilteredRanking(filters);
+
+  if (result.error) {
+    alert("エラー: " + result.error);
+  } else {
+    console.log("🎯 フィルター結果:", result);
+    // 必要ならここで result.ranking を使って表示を更新！
+  }
+});
+
 
 function renderRankingTables() {
   if (!rankingData) return;

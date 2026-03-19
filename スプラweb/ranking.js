@@ -285,7 +285,8 @@ function renderRankingTables() {
   // XPランキング
   // XPランキング
   if (document.getElementById("xpRanking").style.display !== "none") {
-    sortState.xp.key = sortKey;
+    const xpValueType = getSelectValue("xpValueTypeSelect", "xp");
+    sortState.xp.key = xpValueType;
     sortState.xp.asc = sortAsc;
   
     const xpLimit = getMinValue("xpLimitFilter", Infinity);
@@ -304,7 +305,7 @@ function renderRankingTables() {
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
         <td data-label="プレイヤー名">${x.playerName}</td>
-        <td data-label="XP">${x.xp}</td>
+        <td data-label="XP">${x[xpValueType]}</td>
       `;
       xpBody.appendChild(tr);
     });

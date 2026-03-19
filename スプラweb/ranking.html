@@ -76,7 +76,7 @@
           <input type="text" id="playerNameFilter" />
         </label>
         <label>最低XP:
-          <input type="number" id="globalXpMinFilter" value="0" min="0" />
+          <input type="number" id="playerXpMinFilter" value="0" min="0" />
         </label>
         <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
@@ -105,16 +105,16 @@
           <input type="number" id="weaponMinGames" value="5" min="0" />
         </label>
         <label>カテゴリ:
-          <select id="filterCategory"></select>
+          <select id="weaponFilterCategory"></select>
         </label>
         <label>サブジャンル:
-          <select id="filterSubGenre"></select>
+          <select id="weaponFilterSubGenre"></select>
         </label>
         <label>タイプ:
-          <select id="filterTypes" multiple></select>
+          <select id="weaponFilterTypes" multiple></select>
         </label>
         <label>武器名:
-          <select id="filterWeaponNames" multiple></select>
+          <select id="weaponFilterWeaponNames" multiple></select>
         </label>
         <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
       </div>
@@ -149,7 +149,7 @@
           <input type="text" id="playerWeaponWeaponFilter" />
         </label>
         <label>最低XP:
-          <input type="number" id="globalXpMinFilter" value="0" min="0" />
+          <input type="number" id="pwXpMinFilter" value="0" min="0" />
         </label>
         <label>カテゴリ:
           <select id="pwFilterCategory"></select>
@@ -225,4 +225,3 @@
   </script>
 </body>
 </html>
-

@@ -78,7 +78,7 @@
         <label>最低XP:
           <input type="number" id="playerXpMinFilter" value="0" min="0" />
         </label>
-        <button onclick="fetchFilteredRanking()">🔍 フィルターを適用</button>
+        <button id="playerFilterButton">🔍 フィルターを適用</button>
       </div>
       <table id="playerRankingTable">
         <thead>
@@ -116,7 +116,7 @@
         <label>武器名:
           <select id="weaponFilterWeaponNames" multiple></select>
         </label>
-        <button onclick="fetchFilteredRanking()">🔍 フィルターを適用</button>
+        <button id="weaponFilterButton">🔍 フィルターを適用</button>
       </div>
       <table id="weaponRankingTable">
         <thead>
@@ -215,13 +215,9 @@
     </section>
 
   </main>
-
   <script src="ranking.js"></script>
-  <script>
-    requireLogin();
-    showUserInfo();
-    loadSidebar();
-    initRankingPage();
-  </script>
 </body>
 </html>
+
+
+  <script

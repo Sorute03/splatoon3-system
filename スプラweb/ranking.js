@@ -439,34 +439,46 @@ function renderRankingTables() {
   }
 }
 
-document.getElementById("filterButton").addEventListener("click", async () => {
-  const filters = {
-    rankingType: getSelectValue("rankingTypeSelect", "player"), // ← 必要に応じて変更
-    rule: getSelectValue("ruleFilter", "ALL"),
-    matchType: getSelectValue("matchTypeFilter", "ALL"),
-    minGamesPlayer: getMinValue("minGamesPlayer", 5),
-    minGamesWeapon: getMinValue("minGamesWeapon", 5),
-    minGamesPlayerWeapon: getMinValue("minGamesPlayerWeapon", 5),
-    minGamesXp: getMinValue("minGamesXp", 0),
-    sortKey: getSelectValue("sortKeySelect", "winRate"),
-    sortAsc: getSelectValue("sortOrderSelect", "desc") === "asc",
-    playerNameFilter: getTextValue("playerNameFilter"),
-    weaponNames: getMultiSelectValues("weaponFilterWeaponNames"),
-    type: getMultiSelectValues("weaponFilterTypes"),
-    category: getMultiSelectValues("weaponFilterCategory"),
-    subgenre: getMultiSelectValues("weaponFilterSubGenre"),
-    minXp: getMinValue("minXp", 0),
-    seasonId: getSelectValue("seasonSelect", "ALL")
-  };
+document.addEventListener("DOMContentLoaded", () => {
+  const playerBtn = document.getElementById("playerFilterButton");
+  if (playerBtn) {
+    playerBtn.addEventListener("click", async () => {
+      const filters = {
+        rankingType: "player",
+        rule: getSelectValue("ruleFilter", "ALL"),
+        matchType: getSelectValue("matchTypeFilter", "ALL"),
+        minGamesPlayer: getMinValue("playerMinGames", 5),
+        sortKey: getSelectValue("sortKeySelect", "winRate"),
+        sortAsc: getSelectValue("sortOrderSelect", "desc") === "asc",
+        playerNameFilter: getTextValue("playerNameFilter"),
+        minXp: getMinValue("playerXpMinFilter", 0),
+        seasonId: getSelectValue("seasonSelect", "ALL")
+      };
 
-  console.log("📤 送信する filters:", filters);
+      const result = await fetchFilteredRanking(filters);
+      console.log("🎯 プレイヤーランキング結果:", result);
+    });
+  }
 
-  const result = await fetchFilteredRanking(filters);
+  const weaponBtn = document.getElementById("weaponFilterButton");
+  if (weaponBtn) {
+    weaponBtn.addEventListener("click", async () => {
+      const filters = {
+        rankingType: "weapon",
+        rule: getSelectValue("ruleFilter", "ALL"),
+        matchType: getSelectValue("matchTypeFilter", "ALL"),
+        minGamesWeapon: getMinValue("weaponMinGames", 5),
+        sortKey: getSelectValue("sortKeySelect", "winRate"),
+        sortAsc: getSelectValue("sortOrderSelect", "desc") === "asc",
+        weaponNames: getMultiSelectValues("weaponFilterWeaponNames"),
+        type: getMultiSelectValues("weaponFilterTypes"),
+        category: getMultiSelectValues("weaponFilterCategory"),
+        subgenre: getMultiSelectValues("weaponFilterSubGenre"),
+        seasonId: getSelectValue("seasonSelect", "ALL")
+      };
 
-  if (result.error) {
-    alert("エラー: " + result.error);
-  } else {
-    console.log("🎯 フィルター結果:", result);
-    // 必要ならここで result.ranking を使って表示を更新！
+      const result = await fetchFilteredRanking(filters);
+      console.log("🎯 武器ランキング結果:", result);
+    });
   }
 });

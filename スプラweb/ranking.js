@@ -251,9 +251,16 @@ function populateWeaponFilters(details, names) {
   });
 
   // カテゴリ・サブジャンル・タイプのユニーク値を抽出
-  const categories = [...new Set(details.map(w => w.category).filter(Boolean))];
-  const subgenres = [...new Set(details.map(w => w.subgenre).filter(Boolean))];
-  const types = [...new Set(details.map(w => w.type).filter(Boolean))];
+  console.log("weaponDetails:", weaponDetails);
+
+  const categories = [...new Set(weaponDetails.map(w => w.category).filter(Boolean))];
+  const subgenres = [...new Set(weaponDetails.map(w => w.subgenre).filter(Boolean))];
+  const types = [...new Set(weaponDetails.map(w => w.type).filter(Boolean))];
+  
+  console.log("categories:", categories);
+  console.log("subgenres:", subgenres);
+  console.log("types:", types);
+
 
   // セレクターに反映するヘルパー
   function populateSelect(id, values, allowAll = true) {

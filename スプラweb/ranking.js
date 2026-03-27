@@ -475,6 +475,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       const result = await fetchFilteredRanking(filters);
+      rankingData = result;
+      renderRankingTables();
       console.log("🎯 プレイヤーランキング結果:", result);
     });
   }
@@ -497,6 +499,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       const result = await fetchFilteredRanking(filters);
+      rankingData = result;
+      renderRankingTables();
       console.log("🎯 武器ランキング結果:", result);
     });
   }

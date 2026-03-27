@@ -363,15 +363,24 @@ const matchTypeMap = {
 
 
 function renderRankingTables() {
-  if (!rankingData) return;
+  if (!rankingData) {
+    console.warn("⚠️ rankingData が未定義！");
+    return;
+  }
 
   const ruleFilter = getSelectValue("ruleFilter", "ALL");
   const matchTypeFilter = getSelectValue("matchTypeFilter", "ALL");
-  
-  const rule = ruleMap[ruleFilter] || "ALL";
-  const matchType = matchTypeMap[matchTypeFilter] || "ALL";
-  
+  const rule = ruleFilter;
+  const matchType = matchTypeFilter;
   const key = `${rule}|${matchType}`;
+
+  console.log("🧩 ruleFilter:", ruleFilter);
+  console.log("🧩 matchTypeFilter:", matchTypeFilter);
+  console.log("🧩 使用する key:", key);
+  console.log("🧩 利用可能なキー:", Object.keys(rankingData.playerRankingByRuleAndType || {}));
+
+  const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
+  console.log("📊 playerSource.length:", playerSource.length);
 
   const sortKey = getSelectValue("sortKeySelect", "winRate");
   const sortAsc = getSelectValue("sortOrderSelect", "desc") === "asc";

@@ -104,13 +104,25 @@ async function initSeasonDropdown() {
 }
 
 async function loadRankingForSeason(seasonId) {
+  const filters = {
+    rankingType: "player",
+    rule: "ALL",
+    matchType: "ALL",
+    minGamesPlayer: 1,
+    sortKey: "winRate",
+    sortAsc: false,
+    seasonId: seasonId
+  };
+
   const res = await fetch(window.API_URL, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      mode: "getRankingData",
-      seasonId: seasonId
-    }),
-    headers: { "Content-Type": "application/json" }
+      mode: "getFilteredRanking",
+      action: "getFilteredRanking",
+      filters,
+      token: "super-secret-token-123"
+    })
   });
 
   rankingData = await res.json();
@@ -120,6 +132,7 @@ async function loadRankingForSeason(seasonId) {
   document.getElementById("lastUpdated").textContent =
     rankingData.updatedAt ? `最終更新: ${new Date(rankingData.updatedAt).toLocaleString()}` : "";
 }
+
 function setupSortableHeaders() {
   const headers = [
     {

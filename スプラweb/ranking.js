@@ -306,6 +306,7 @@ function populateWeaponFilters(details, names) {
 }
 
 
+
 async function fetchFilteredRanking(filters) {
   const payload = {
     mode: "getFilteredRanking",
@@ -333,12 +334,17 @@ async function fetchFilteredRanking(filters) {
       console.log("📊 rawPlayerList.length:", data.debug.rawPlayerListLength);
     }
 
-    return data; // ← ここでそのまま返すのが正解！
+    return {
+      ranking: data.ranking || [],
+      updatedAt: data.updatedAt || "",
+      type: filters.rankingType // ここでランキング種別を保持！
+    };
   } catch (error) {
     console.error("❌ fetchFilteredRanking エラー:", error);
     return { error: "データの取得に失敗しました" };
   }
 }
+
 
 const ruleMap = {
   "ナワバリ": "ナワバリ",
@@ -369,21 +375,18 @@ function renderRankingTables() {
 
   const sortKey = getSelectValue("sortKeySelect", "winRate");
   const sortAsc = getSelectValue("sortOrderSelect", "desc") === "asc";
+  const data = rankingData.ranking || [];
 
   // プレイヤーランキング
-  if (document.getElementById("playerRanking").style.display !== "none") {
+  if (rankingData.type === "player") {
     sortState.player.key = sortKey;
     sortState.player.asc = sortAsc;
 
-    const playerBody = document.querySelector("#playerRankingTable tbody");
-    playerBody.innerHTML = "";
+    const tbody = document.querySelector("#playerRankingTable tbody");
+    tbody.innerHTML = "";
 
-    const playerSource = rankingData.ranking || [];
-
-    const playerSorted = [...playerSource]
-      .sort(sortBy(sortState.player.key, sortState.player.asc));
-
-    playerSorted.forEach((p, i) => {
+    const sorted = [...data].sort(sortBy(sortKey, sortAsc));
+    sorted.forEach((p, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
@@ -392,24 +395,20 @@ function renderRankingTables() {
         <td data-label="勝利数">${p.wins}</td>
         <td data-label="試合数">${p.total}</td>
       `;
-      playerBody.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
 
   // 武器ランキング
-  if (document.getElementById("weaponRanking").style.display !== "none") {
+  else if (rankingData.type === "weapon") {
     sortState.weapon.key = sortKey;
     sortState.weapon.asc = sortAsc;
 
-    const weaponBody = document.querySelector("#weaponRankingTable tbody");
-    weaponBody.innerHTML = "";
+    const tbody = document.querySelector("#weaponRankingTable tbody");
+    tbody.innerHTML = "";
 
-    const weaponSource = rankingData.ranking || [];
-
-    const weaponSorted = [...weaponSource]
-      .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
-
-    weaponSorted.forEach((w, i) => {
+    const sorted = [...data].sort(sortBy(sortKey, sortAsc));
+    sorted.forEach((w, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
@@ -418,24 +417,20 @@ function renderRankingTables() {
         <td data-label="勝利数">${w.wins}</td>
         <td data-label="試合数">${w.total}</td>
       `;
-      weaponBody.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
 
   // プレイヤー×武器ランキング
-  if (document.getElementById("playerWeaponRanking").style.display !== "none") {
+  else if (rankingData.type === "playerWeapon") {
     sortState.playerWeapon.key = sortKey;
     sortState.playerWeapon.asc = sortAsc;
 
-    const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
-    pwBody.innerHTML = "";
+    const tbody = document.querySelector("#playerWeaponRankingTable tbody");
+    tbody.innerHTML = "";
 
-    const pwSource = rankingData.ranking || [];
-
-    const pwSorted = [...pwSource]
-      .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
-
-    pwSorted.forEach((pw, i) => {
+    const sorted = [...data].sort(sortBy(sortKey, sortAsc));
+    sorted.forEach((pw, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
@@ -449,35 +444,36 @@ function renderRankingTables() {
         <td data-label="K/D比">${pw.kdRatio === Infinity ? "∞" : pw.kdRatio?.toFixed(2) ?? "-"}</td>
         <td data-label="最高キル">${pw.maxKills ?? "-"}</td>
       `;
-      pwBody.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
 
   // XPランキング
-  if (document.getElementById("xpRanking").style.display !== "none") {
+  else if (rankingData.type === "xp") {
     const xpValueType = getSelectValue("xpValueTypeSelect", "xp");
     sortState.xp.key = xpValueType;
     sortState.xp.asc = sortAsc;
 
-    const xpBody = document.querySelector("#xpRankingTable tbody");
-    xpBody.innerHTML = "";
+    const tbody = document.querySelector("#xpRankingTable tbody");
+    tbody.innerHTML = "";
 
-    const xpSource = rankingData.ranking || [];
-
-    const xpSorted = [...xpSource]
-      .sort(sortBy(sortState.xp.key, sortState.xp.asc));
-
-    xpSorted.forEach((x, i) => {
+    const sorted = [...data].sort(sortBy(xpValueType, sortAsc));
+    sorted.forEach((x, i) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
         <td data-label="プレイヤー名">${x.playerName}</td>
         <td data-label="XP">${x[xpValueType]}</td>
       `;
-      xpBody.appendChild(tr);
+      tbody.appendChild(tr);
     });
   }
+
+  // 更新日時表示
+  document.getElementById("lastUpdated").textContent =
+    rankingData.updatedAt ? `最終更新: ${new Date(rankingData.updatedAt).toLocaleString()}` : "";
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const playerBtn = document.getElementById("playerFilterButton");

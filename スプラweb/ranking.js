@@ -333,7 +333,7 @@ async function fetchFilteredRanking(filters) {
       console.log("📊 rawPlayerList.length:", data.debug.rawPlayerListLength);
     }
 
-    return data;
+    return data; // ← ここでそのまま返すのが正解！
   } catch (error) {
     console.error("❌ fetchFilteredRanking エラー:", error);
     return { error: "データの取得に失敗しました" };

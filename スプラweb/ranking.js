@@ -340,6 +340,25 @@ async function fetchFilteredRanking(filters) {
   }
 }
 
+const ruleMap = {
+  "ナワバリ": "ナワバリ",
+  "ガチエリア": "ガチエリア",
+  "ガチホコ": "ガチホコ",
+  "ガチヤグラ": "ガチヤグラ",
+  "ガチアサリ": "ガチアサリ",
+  "ALL": "ALL",
+  "すべて": "ALL"
+};
+
+const matchTypeMap = {
+  "ナワバリ": "regular",
+  "オープン": "open",
+  "チャレンジ": "challenge",
+  "Xマッチ": "xmatch",
+  "イベントマッチ": "event",
+  "ALL": "ALL",
+  "すべて": "ALL"
+};
 
 
 
@@ -348,7 +367,12 @@ function renderRankingTables() {
 
   const ruleFilter = getSelectValue("ruleFilter", "ALL");
   const matchTypeFilter = getSelectValue("matchTypeFilter", "ALL");
-  const key = `${ruleFilter}|${matchTypeFilter}`;
+  
+  const rule = ruleMap[ruleFilter] || "ALL";
+  const matchType = matchTypeMap[matchTypeFilter] || "ALL";
+  
+  const key = `${rule}|${matchType}`;
+
   const sortKey = getSelectValue("sortKeySelect", "winRate");
   const sortAsc = getSelectValue("sortOrderSelect", "desc") === "asc";
 

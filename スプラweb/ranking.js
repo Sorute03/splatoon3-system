@@ -361,26 +361,11 @@ const matchTypeMap = {
 };
 
 
-
 function renderRankingTables() {
   if (!rankingData) {
     console.warn("⚠️ rankingData が未定義！");
     return;
   }
-
-  const ruleFilter = getSelectValue("ruleFilter", "ALL");
-  const matchTypeFilter = getSelectValue("matchTypeFilter", "ALL");
-  const rule = ruleFilter;
-  const matchType = matchTypeFilter;
-  const key = `${rule}|${matchType}`;
-
-  console.log("🧩 ruleFilter:", ruleFilter);
-  console.log("🧩 matchTypeFilter:", matchTypeFilter);
-  console.log("🧩 使用する key:", key);
-  console.log("🧩 利用可能なキー:", Object.keys(rankingData.playerRankingByRuleAndType || {}));
-
-  const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
-  console.log("📊 playerSource.length:", playerSource.length);
 
   const sortKey = getSelectValue("sortKeySelect", "winRate");
   const sortAsc = getSelectValue("sortOrderSelect", "desc") === "asc";
@@ -393,7 +378,7 @@ function renderRankingTables() {
     const playerBody = document.querySelector("#playerRankingTable tbody");
     playerBody.innerHTML = "";
 
-    const playerSource = (rankingData.playerRankingByRuleAndType || {})[key] || [];
+    const playerSource = rankingData.ranking || [];
 
     const playerSorted = [...playerSource]
       .sort(sortBy(sortState.player.key, sortState.player.asc));
@@ -419,7 +404,7 @@ function renderRankingTables() {
     const weaponBody = document.querySelector("#weaponRankingTable tbody");
     weaponBody.innerHTML = "";
 
-    const weaponSource = (rankingData.weaponRankingByRuleAndType || {})[key] || [];
+    const weaponSource = rankingData.ranking || [];
 
     const weaponSorted = [...weaponSource]
       .sort(sortBy(sortState.weapon.key, sortState.weapon.asc));
@@ -445,7 +430,7 @@ function renderRankingTables() {
     const pwBody = document.querySelector("#playerWeaponRankingTable tbody");
     pwBody.innerHTML = "";
 
-    const pwSource = (rankingData.playerWeaponRankingByGroup || {})["ALL|ALL|ALL|ALL|ALL"] || [];
+    const pwSource = rankingData.ranking || [];
 
     const pwSorted = [...pwSource]
       .sort(sortBy(sortState.playerWeapon.key, sortState.playerWeapon.asc));
@@ -477,7 +462,9 @@ function renderRankingTables() {
     const xpBody = document.querySelector("#xpRankingTable tbody");
     xpBody.innerHTML = "";
 
-    const xpSorted = [...(rankingData.xpRanking || [])]
+    const xpSource = rankingData.ranking || [];
+
+    const xpSorted = [...xpSource]
       .sort(sortBy(sortState.xp.key, sortState.xp.asc));
 
     xpSorted.forEach((x, i) => {

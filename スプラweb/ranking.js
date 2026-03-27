@@ -326,6 +326,11 @@ async function fetchFilteredRanking(filters) {
     console.log("🐛 フルレスポンス:", data);
     console.log("🐛 デバッグ情報:", data.debug);
 
+    if (data.debug) {
+      console.log("🔑 playerKey:", data.debug.playerKey);
+      console.log("🗝️  playerRanking keys:", data.debug.playerRankingKeys);
+      console.log("📊 rawPlayerList.length:", data.debug.rawPlayerListLength);
+    }
 
     return data;
   } catch (error) {
@@ -333,6 +338,7 @@ async function fetchFilteredRanking(filters) {
     return { error: "データの取得に失敗しました" };
   }
 }
+
 
 
 

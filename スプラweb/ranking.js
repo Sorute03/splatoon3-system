@@ -346,6 +346,7 @@ async function fetchFilteredRanking(filters) {
 }
 
 
+
 const ruleMap = {
   "ナワバリ": "ナワバリ",
   "ガチエリア": "ガチエリア",

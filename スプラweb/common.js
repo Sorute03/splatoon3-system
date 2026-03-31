@@ -1,6 +1,13 @@
 // グローバルAPIエンドポイント
 window.API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
+function secureLog(...args) {
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  if (isAdmin) {
+    console.log(...args);
+  }
+}
+
 // ログインしていなければ index.html にリダイレクト
 function requireLogin() {
   const userId = localStorage.getItem("userId");
@@ -49,7 +56,7 @@ async function login() {
     });
 
     const text = await res.text();
-    console.log("レスポンス文字列（login）:", text);
+    secureLog("レスポンス文字列（login）:", text);
 
     let result;
     try {
@@ -72,6 +79,9 @@ async function login() {
     msg.textContent = "通信エラー：" + e.message;
   }
 }
+
+
+
 
 // 新規登録処理
 async function register() {
@@ -101,7 +111,7 @@ async function register() {
     });
 
     const text = await res.text();
-    console.log("レスポンス文字列（register）:", text);
+    secureLog("レスポンス文字列（register）:", text);
 
     let result;
     try {

@@ -58,8 +58,10 @@ function getSelectValue(id, defaultValue = "") {
 
 function getMultiSelectValues(id) {
   const select = document.getElementById(id);
-  return Array.from(select.selectedOptions).map(opt => opt.value);
+  const values = Array.from(select.selectedOptions).map(opt => opt.value);
+  return values.includes("ALL") ? [] : values;
 }
+
 
 function isAllSelected(values) {
   return values.length === 0 || values.includes("ALL");

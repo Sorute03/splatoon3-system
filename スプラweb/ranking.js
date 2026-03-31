@@ -228,13 +228,26 @@ function updateSortKeySelector(type) {
 }
 
 function showRanking(type) {
-  document.querySelectorAll(".ranking-section").forEach(sec => sec.style.display = "none");
-  const target = document.getElementById(`${type}Ranking`);
-  if (target) target.style.display = "block";
+  document.querySelectorAll(".ranking-section").forEach(section => {
+    section.style.display = "none";
+  });
+  document.getElementById(`${type}Ranking`).style.display = "block";
 
-  updateSortKeySelector(type);
-  renderRankingTables();
+  const filters = {
+    seasonId: getSelectValue("seasonSelect", "ALL"),
+    rule: getSelectValue("ruleFilter", "ALL"),
+    matchType: getSelectValue("matchTypeFilter", "ALL"),
+    rankingType: type // ← これがないとGAS側で分岐できない！
+  };
+
+  console.log("📤 フィルター送信:", filters);
+
+  fetchFilteredRanking(filters).then(result => {
+    rankingData = result;
+    renderRankingTables();
+  });
 }
+
 function sortBy(key, asc) {
   return (a, b) => {
     const valA = typeof a[key] === "string" ? a[key].toLowerCase() : a[key];

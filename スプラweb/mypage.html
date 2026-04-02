@@ -32,7 +32,7 @@
       })));
 
       if (Array.isArray(result.users)) {
-        const user = result.users.find(u => String(u.userId) === String(userId));
+        const user = result.users.find(u => String(u.userId) == String(userId));
         return user?.playerName || "(不明なプレイヤー)";
       }
       return "(不明なプレイヤー)";

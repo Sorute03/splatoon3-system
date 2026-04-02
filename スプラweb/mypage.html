@@ -24,6 +24,9 @@
       });
 
       const result = await res.json();
+      secureLog("🔍 userId to match:", userId);
+      secureLog("📋 user list:", result.users.map(u => u.userId));
+
       if (Array.isArray(result.users)) {
         const user = result.users.find(u => String(u.userId) === String(userId));
         return user?.playerName || "(不明なプレイヤー)";

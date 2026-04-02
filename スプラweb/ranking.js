@@ -409,7 +409,9 @@ function renderRankingTables() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
-        <td data-label="プレイヤー名">${p.playerName}</td>
+        <td data-label="プレイヤー名">
+          <a href="mypage.html?userId=${p.userid}" class="player-link">${p.playername}</a>
+        </td>
         <td data-label="勝率">${(p.winRate * 100).toFixed(1)}%</td>
         <td data-label="勝利数">${p.wins}</td>
         <td data-label="試合数">${p.total}</td>
@@ -453,7 +455,9 @@ function renderRankingTables() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
-        <td data-label="プレイヤー名">${pw.playerName}</td>
+        <td data-label="プレイヤー名">
+          <a href="mypage.html?userId=${p.userid}" class="player-link">${p.playername}</a>
+        </td>
         <td data-label="武器">${pw.weapon}</td>
         <td data-label="勝率">${(pw.winRate * 100).toFixed(1)}%</td>
         <td data-label="勝利数">${pw.wins}</td>
@@ -481,7 +485,9 @@ function renderRankingTables() {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
-        <td data-label="プレイヤー名">${x.playerName}</td>
+        <td data-label="プレイヤー名">
+          <a href="mypage.html?userId=${x.userid}" class="player-link">${x.playername}</a>
+        </td>
         <td data-label="XP">${x[xpValueType]}</td>
       `;
       tbody.appendChild(tr);

@@ -6,12 +6,33 @@
   <link rel="stylesheet" href="style.css">
   <script src="common.js"></script>
   <script defer>
+    // クエリ取得
     function getQueryParam(name) {
       const params = new URLSearchParams(window.location.search);
       return params.get(name);
     }
 
-    function initMypage() {
+    // プレイヤー名取得
+    async function fetchUserName(userId) {
+      const res = await fetch(window.API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "getUserList",
+          token: "super-secret-token-123"
+        })
+      });
+
+      const result = await res.json();
+      if (Array.isArray(result.users)) {
+        const user = result.users.find(u => String(u.userId) === String(userId));
+        return user?.playerName || "(不明なプレイヤー)";
+      }
+      return "(不明なプレイヤー)";
+    }
+
+    // 初期化
+    async function initMypage() {
       const queryUserId = getQueryParam("userId");
       const currentUserId = localStorage.getItem("userId");
       const isAdmin = localStorage.getItem("isAdmin") === "true";
@@ -19,8 +40,17 @@
       const viewingOwnPage = !queryUserId || queryUserId === currentUserId;
       const targetUserId = viewingOwnPage ? currentUserId : queryUserId;
 
+      const playerName = await fetchUserName(targetUserId);
+
       const nameSpan = document.getElementById("mypageName");
-      if (nameSpan) nameSpan.textContent = targetUserId;
+      const welcome = document.getElementById("welcomeMessage");
+      if (nameSpan) nameSpan.textContent = playerName;
+
+      if (welcome) {
+        welcome.textContent = viewingOwnPage
+          ? `ようこそ、${playerName} さん！`
+          : `${playerName} のページへようこそ！`;
+      }
 
       document.getElementById("userIdDisplay").textContent = targetUserId;
       document.getElementById("secretIdDisplay").textContent = viewingOwnPage

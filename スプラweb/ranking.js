@@ -239,10 +239,13 @@ function showRanking(type) {
     seasonId: getSelectValue("seasonSelect", "ALL"),
     rule: getSelectValue("ruleFilter", "ALL"),
     matchType: getSelectValue("matchTypeFilter", "ALL"),
-    rankingType: type // ← これがないとGAS側で分岐できない！
+    rankingType: type
   };
 
-  console.log("📤 フィルター送信:", filters);
+  secureLog("📤 フィルター送信:", filters);
+
+  // 🔧 ここでソートセレクターを更新！
+  updateSortKeySelector(type);
 
   fetchFilteredRanking(filters).then(result => {
     rankingData = result;

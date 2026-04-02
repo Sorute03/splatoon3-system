@@ -20,9 +20,10 @@ jobs:
         uses: cicirello/generate-sitemap@v1
         with:
           sitemap-format: xml
-          base-url-path: /
+          base-url-path: http://spl3vrmh.dpdns.org/
           include-html: true
           include-pdf: false
+
 
       - name: Commit and Push Sitemap
         run: |

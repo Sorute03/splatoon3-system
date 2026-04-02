@@ -411,7 +411,7 @@ function renderRankingTables() {
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
         <td data-label="プレイヤー名">
-          <a href="mypage.html?userId=${pw.userId}" class="player-link">${pw.playerName}</a>
+          <a href="mypage.html?userId=${pw.userId}" class="player-link">${p.playerName}</a>
         </td>
         <td data-label="勝率">${(p.winRate * 100).toFixed(1)}%</td>
         <td data-label="勝利数">${p.wins}</td>
@@ -487,7 +487,7 @@ function renderRankingTables() {
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>
         <td data-label="プレイヤー名">
-          <a href="mypage.html?userId=${pw.userId}" class="player-link">${pw.playerName}</a>
+          <a href="mypage.html?userId=${pw.userId}" class="player-link">${x.playerName}</a>
         <td data-label="XP">${x[xpValueType]}</td>
       `;
       tbody.appendChild(tr);

@@ -1,9 +1,10 @@
 name: Generate Sitemap
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["pages-build-deployment"]
+    types:
+      - completed
 
 permissions:
   contents: write

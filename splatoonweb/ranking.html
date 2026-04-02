@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ランキング</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="common.js"></script>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+
+  <main class="main">
+    <h1>ランキング</h1>
+
+    <!-- シーズン・ルール・マッチタイプのフィルター -->
+    <div class="filters">
+      <label for="seasonSelect">シーズン選択:</label>
+      <select id="seasonSelect"></select>
+
+      <label for="ruleFilter">ルール:</label>
+      <select id="ruleFilter">
+        <option value="ALL">すべて</option>
+        <option value="ナワバリ">ナワバリ</option>
+        <option value="ガチエリア">ガチエリア</option>
+        <option value="ガチホコ">ガチホコ</option>
+        <option value="ガチヤグラ">ガチヤグラ</option>
+        <option value="ガチアサリ">ガチアサリ</option>
+      </select>
+
+      <label for="matchTypeFilter">マッチタイプ:</label>
+      <select id="matchTypeFilter">
+        <option value="ALL">すべて</option>
+        <option value="regular">ナワバリ</option>
+        <option value="open">オープン</option>
+        <option value="challenge">チャレンジ</option>
+        <option value="xmatch">Xマッチ</option>
+        <option value="event">イベントマッチ</option>
+      </select>
+    </div>
+
+    <!-- 並び替えセレクター -->
+    <div class="filters" id="sortSelectorContainer" style="margin-bottom: 1em;">
+      <label>並び替え基準:
+        <select id="sortKeySelect"></select>
+      </label>
+      <label>並び順:
+        <select id="sortOrderSelect">
+          <option value="desc">降順（高い順）</option>
+          <option value="asc">昇順（低い順）</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="lastUpdated"></div>
+
+    <!-- ランキング切り替えボタン -->
+    <div class="ranking-tabs" style="margin: 1em 0;">
+      <button onclick="showRanking('player')">プレイヤー</button>
+      <button onclick="showRanking('weapon')">ブキ</button>
+      <button onclick="showRanking('playerWeapon')">プレイヤー×ブキ</button>
+      <button onclick="showRanking('xp')">XP</button>
+    </div>
+
+    <!-- プレイヤーランキング -->
+    <section id="playerRanking" class="ranking-section">
+      <h2>プレイヤー勝率ランキング</h2>
+      <div class="filters">
+        <label>表示数:
+          <input type="number" id="playerLimitFilter" value="100" min="1" />
+        </label>
+        <label>最低試合数:
+          <input type="number" id="playerMinGames" value="5" min="0" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="playerNameFilter" />
+        </label>
+        <label>最低XP:
+          <input type="number" id="playerXpMinFilter" value="0" min="0" />
+        </label>
+        <button id="playerFilterButton">🔍 フィルターを適用</button>
+      </div>
+      <table id="playerRankingTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>プレイヤー名</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- 武器ランキング -->
+    <section id="weaponRanking" class="ranking-section" style="display:none;">
+      <h2>武器別勝率ランキング</h2>
+      <div class="filters">
+        <label>表示数:
+          <input type="number" id="weaponLimitFilter" value="100" min="1" />
+        </label>
+        <label>最低試合数:
+          <input type="number" id="weaponMinGames" value="5" min="0" />
+        </label>
+        <label>カテゴリ:
+          <select id="weaponFilterCategory"></select>
+        </label>
+        <label>サブジャンル:
+          <select id="weaponFilterSubGenre"></select>
+        </label>
+        <label>タイプ:
+          <select id="weaponFilterTypes" multiple></select>
+        </label>
+        <label>武器名:
+          <select id="weaponFilterWeaponNames" multiple></select>
+        </label>
+        <button id="weaponFilterButton">🔍 フィルターを適用</button>
+      </div>
+      <table id="weaponRankingTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>武器</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- プレイヤー×武器ランキング -->
+    <section id="playerWeaponRanking" class="ranking-section" style="display:none;">
+      <h2>プレイヤー×武器別勝率ランキング</h2>
+      <div class="filters">
+        <label>表示数:
+          <input type="number" id="playerWeaponLimitFilter" value="100" min="1" />
+        </label>
+        <label>最低試合数:
+          <input type="number" id="playerWeaponMinGames" value="5" min="0" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="playerWeaponNameFilter" />
+        </label>
+        <label>武器名フィルター:
+          <input type="text" id="playerWeaponWeaponFilter" />
+        </label>
+        <label>最低XP:
+          <input type="number" id="pwXpMinFilter" value="0" min="0" />
+        </label>
+        <label>カテゴリ:
+          <select id="pwFilterCategory"></select>
+        </label>
+        <label>サブジャンル:
+          <select id="pwFilterSubGenre"></select>
+        </label>
+        <label>タイプ:
+          <select id="pwFilterTypes" multiple></select>
+        </label>
+        <label>武器名:
+          <select id="pwFilterWeaponNames" multiple></select>
+        </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
+      </div>
+      <table id="playerWeaponRankingTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>プレイヤー名</th>
+            <th>武器</th>
+            <th>勝率</th>
+            <th>勝利数</th>
+            <th>試合数</th>
+            <th>平均キル</th>
+            <th>平均デス</th>
+            <th>K/D比</th>
+            <th>最高キル</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- XPランキング -->
+    <section id="xpRanking" class="ranking-section" style="display:none;">
+      <h2>XPランキング</h2>
+      <div class="filters">
+        <label>表示数:
+          <input type="number" id="xpLimitFilter" value="100" min="1" />
+        </label>
+        <label>プレイヤー名フィルター:
+          <input type="text" id="xpNameFilter" />
+        </label>
+        <label>XPの種類:
+          <select id="xpValueTypeSelect">
+            <option value="xp">現在のXP</option>
+            <option value="maxXp">最高XP</option>
+          </select>
+        </label>
+        <button onclick="renderRankingTables()">🔍 フィルターを適用</button>
+      </div>
+      <table id="xpRankingTable">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>プレイヤー名</th>
+            <th>XP</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+  </main>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      requireLogin();
+      showUserInfo();
+      loadSidebar();
+      initRankingPage();
+    });
+  </script>
+  <script src="ranking.js"></script>
+</body>
+</html>

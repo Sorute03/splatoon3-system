@@ -1,0 +1,408 @@
+const ruleSelect = document.getElementById("rule");
+const matchTypeSelect = document.getElementById("matchType");
+const xpInput = document.getElementById("xpInput");
+const xpField = document.getElementById("xp");
+
+let weaponList = [];
+let stageList = [];
+
+const ruleOptions = {
+  turf: ["ナワバリバトル"],
+  xmatch: ["ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"],
+  challenge: ["ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"],
+  open: ["ガチエリア", "ガチヤグラ", "ガチホコ", "ガチアサリ"],
+  event: ["イベントマッチ"]
+};
+
+async function fetchList(action) {
+  const res = await fetch(window.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mode: action })
+  });
+  return await res.json();
+}
+
+async function fetchSeasonId() {
+  const res = await fetch(window.API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "getCurrentSeasonId" })
+  });
+  const result = await res.json();
+  return result.seasonId;
+}
+
+function checkSeasonChange(currentSeasonId) {
+  const lastSeasonId = localStorage.getItem("lastSeasonId");
+  if (lastSeasonId && lastSeasonId !== currentSeasonId) {
+    Object.keys(localStorage).forEach(key => {
+      if (
+        key.startsWith("matchCount_") ||
+        key.startsWith("winLose_") ||
+        key.startsWith("xpGiven_") ||
+        key.startsWith("xpSubmitted_")
+      ) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
+  localStorage.setItem("lastSeasonId", currentSeasonId);
+}
+
+function getMatchCountKey(seasonId, rule) {
+  return `matchCount_${seasonId}_${rule}`;
+}
+
+function getMatchCount(seasonId, rule) {
+  return Number(localStorage.getItem(getMatchCountKey(seasonId, rule)) || 0);
+}
+
+function incrementMatchCount(seasonId, rule, count = 1) {
+  const key = getMatchCountKey(seasonId, rule);
+  const current = getMatchCount(seasonId, rule);
+  localStorage.setItem(key, current + count);
+}
+
+function getWinLoseKey(seasonId, rule) {
+  return `winLose_${seasonId}_${rule}`;
+}
+
+function getWinLoseCount(seasonId, rule) {
+  const raw = localStorage.getItem(getWinLoseKey(seasonId, rule));
+  try {
+    return raw ? JSON.parse(raw) : { win: 0, lose: 0 };
+  } catch {
+    return { win: 0, lose: 0 };
+  }
+}
+
+function incrementWinLoseCount(seasonId, rule, results) {
+  const key = getWinLoseKey(seasonId, rule);
+  const current = getWinLoseCount(seasonId, rule);
+  results.forEach(r => {
+    if (r === "win") current.win++;
+    if (r === "lose") current.lose++;
+  });
+  localStorage.setItem(key, JSON.stringify(current));
+}
+
+function getXPFlagKey(seasonId, rule) {
+  return `xpGiven_${seasonId}_${rule}`;
+}
+
+function hasGivenXP(seasonId, rule) {
+  return localStorage.getItem(getXPFlagKey(seasonId, rule)) === "true";
+}
+
+function setXPFlag(seasonId, rule) {
+  localStorage.setItem(getXPFlagKey(seasonId, rule), "true");
+}
+
+function createMatchInput(index = null) {
+  const container = document.createElement("div");
+  container.className = "match-block";
+
+  if (index !== null) {
+    const title = document.createElement("h4");
+    title.textContent = `第${index + 1}戦`;
+    container.appendChild(title);
+  }
+
+  const fields = [
+    { label: "ステージ", name: "stage", type: "select-stage", required: true },
+    { label: "使用ブキ", name: "weapon", type: "select-weapon", required: true },
+    { label: "キル数", name: "kills", type: "number", required: true },
+    { label: "トドメ数（任意）", name: "finishKills", type: "number" },
+    { label: "アシストキル数（任意）", name: "assistKills", type: "number" },
+    { label: "デス数", name: "deaths", type: "number", required: true },
+    { label: "スペシャル使用回数", name: "specials", type: "number", required: true },
+    { label: "勝敗", name: "result", type: "select-result", required: true },
+    { label: "塗りポイント", name: "paintPoint", type: "number", required: true }
+  ];
+
+  fields.forEach(f => {
+    const group = document.createElement("div");
+    group.className = "form-group";
+
+    const label = document.createElement("label");
+    label.textContent = f.label;
+
+    const fieldName = f.name + (index !== null ? `_${index}` : "");
+
+    if (f.type === "select-weapon" || f.type === "select-stage") {
+      const select = document.createElement("select");
+      select.name = fieldName;
+      if (f.required) select.required = true;
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "選択してください";
+      select.appendChild(defaultOption);
+
+      const list = f.type === "select-weapon" ? weaponList : stageList;
+      list.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+
+      group.appendChild(label);
+      group.appendChild(select);
+    } else if (f.type === "select-result") {
+      const select = document.createElement("select");
+      select.name = fieldName;
+      if (f.required) select.required = true;
+
+      ["", "win", "lose"].forEach(val => {
+        const option = document.createElement("option");
+        option.value = val;
+        option.textContent = val === "win" ? "勝ち" : val === "lose" ? "負け" : "選択してください";
+        select.appendChild(option);
+      });
+
+      select.addEventListener("change", checkXPCondition);
+      group.appendChild(label);
+      group.appendChild(select);
+    } else {
+      const input = document.createElement("input");
+      input.name = fieldName;
+      input.type = f.type || "text";
+      if (f.required) input.required = true;
+      input.placeholder = f.label;
+      group.appendChild(label);
+      group.appendChild(input);
+    }
+
+    container.appendChild(group);
+  });
+
+  return container;
+}
+
+function updateMatchInputs() {
+  const matchType = matchTypeSelect.value;
+  const mode = document.getElementById("xMatchMode").value;
+  const container = document.getElementById("matchInputs");
+  container.innerHTML = "";
+
+  if (matchType === "xmatch" && mode === "set") {
+    for (let i = 0; i < 3; i++) {
+      container.appendChild(createMatchInput(i));
+    }
+  } else {
+    container.appendChild(createMatchInput());
+  }
+
+  checkXPCondition();
+}
+
+function checkXPCondition() {
+  const matchType = matchTypeSelect.value;
+  const mode = document.getElementById("xMatchMode")?.value || "";
+  const rule = ruleSelect.value;
+  const seasonId = localStorage.getItem("currentSeasonId") || "Unknown";
+  const matchCount = getMatchCount(seasonId, rule);
+  const winLose = getWinLoseCount(seasonId, rule);
+  const xpGiven = hasGivenXP(seasonId, rule);
+
+  let currentWins = 0;
+  let currentLoses = 0;
+
+  if (matchType === "xmatch" && mode === "set") {
+    for (let i = 0; i < 3; i++) {
+      const val = document.querySelector(`[name="result_${i}"]`)?.value;
+      if (val === "win") currentWins++;
+      if (val === "lose") currentLoses++;
+    }
+  } else {
+    const val = document.querySelector(`[name="result"]`)?.value;
+    if (val === "win") currentWins = 1;
+    if (val === "lose") currentLoses = 1;
+  }
+
+  const totalWins = winLose.win + currentWins;
+  const totalLoses = winLose.lose + currentLoses;
+  const treatAsPost5 = matchCount >= 5 || xpGiven;
+
+  if (!treatAsPost5) {
+    xpInput.style.display = "block";
+    xpField.required = false;
+  } else {
+    if (totalWins >= 3 || totalLoses >= 3) {
+      xpInput.style.display = "block";
+      xpField.required = true;
+    } else {
+      xpInput.style.display = "none";
+      xpField.required = false;
+      xpField.value = "";
+    }
+  }
+}
+
+// イベントリスナー登録
+matchTypeSelect.addEventListener("change", () => {
+  const matchType = matchTypeSelect.value;
+  let rules = ruleOptions[matchType] || [];
+  ruleSelect.innerHTML = "";
+  rules.forEach(rule => {
+    const option = document.createElement("option");
+    option.value = rule;
+    option.textContent = rule;
+    ruleSelect.appendChild(option);
+  });
+
+  document.getElementById("xMatchOptions").style.display = (matchType === "xmatch") ? "block" : "none";
+  xpInput.style.display = "none";
+  xpField.value = "";
+  updateMatchInputs();
+});
+
+document.getElementById("xMatchMode").addEventListener("change", updateMatchInputs);
+
+document.getElementById("matchForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const form = e.target;
+  const matchType = matchTypeSelect.value;
+  const mode = document.getElementById("xMatchMode")?.value || "";
+  const rule = form.rule.value;
+  const xpValue = form.xp.value.trim();
+  const seasonId = await fetchSeasonId();
+  checkSeasonChange(seasonId);
+  localStorage.setItem("currentSeasonId", seasonId);
+
+  const isXPVisible = xpInput.style.display !== "none";
+  const isXPRequired = xpField.required;
+  const isFirstXP = xpValue !== "" && !hasGivenXP(seasonId, rule);
+
+  if (isXPVisible && isXPRequired && xpValue === "") {
+    const confirmEmpty = confirm("XPが入力されていません。このまま登録してもよろしいですか？");
+    if (!confirmEmpty) return;
+  }
+
+  if (isFirstXP) {
+    const confirmXP = confirm(`このXP「${xpValue}」で確定してもよろしいですか？（あとから変更できません）`);
+    if (!confirmXP) return;
+  }
+
+  const msg = document.getElementById("matchMessage");
+
+  const userId = localStorage.getItem("userId");
+  const secretId = localStorage.getItem("secretId");
+
+  const matches = [];
+
+  if (matchType === "xmatch" && mode === "set") {
+    for (let i = 0; i < 3; i++) {
+      matches.push({
+        userId,
+        secretId,
+        matchType,
+        rule,
+        stage: form[`stage_${i}`].value.trim(),
+        weapon: form[`weapon_${i}`].value.trim(),
+        kills: Number(form[`kills_${i}`].value),
+        finishKills: form[`finishKills_${i}`].value ? Number(form[`finishKills_${i}`].value) : "",
+        assistKills: form[`assistKills_${i}`].value ? Number(form[`assistKills_${i}`].value) : "",
+        deaths: Number(form[`deaths_${i}`].value),
+        specials: Number(form[`specials_${i}`].value),
+        result: form[`result_${i}`].value,
+        paintPoint: Number(form[`paintPoint_${i}`].value),
+        xp: ""
+      });
+    }
+    const xp = form.xp.value ? Number(form.xp.value) : "";
+    matches[matches.length - 1].xp = xp;
+  } else {
+    matches.push({
+      userId,
+      secretId,
+      matchType,
+      rule,
+      stage: form.stage.value.trim(),
+      weapon: form.weapon.value.trim(),
+      paintPoint: Number(form.paintPoint.value),
+      kills: Number(form.kills.value),
+      finishKills: form.finishKills.value ? Number(form.finishKills.value) : "",
+      assistKills: form.assistKills.value ? Number(form.assistKills.value) : "",
+      deaths: Number(form.deaths.value),
+      specials: Number(form.specials.value),
+      result: form.result.value,
+      xp: form.xp.value ? Number(form.xp.value) : ""
+    });
+  }
+
+  let successCount = 0;
+  for (const match of matches) {
+    try {
+      const res = await fetch(window.API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "saveMatch", match })
+      });
+      const result = await res.json();
+      if (result.status === "ok") successCount++;
+    } catch (e) {
+      console.error("送信エラー:", e);
+    }
+  }
+
+  if (successCount === matches.length) {
+    msg.style.color = "green";
+    msg.textContent = "戦績を登録しました！";
+
+    if (matchType === "xmatch" && mode === "set") {
+      incrementMatchCount(seasonId, rule, matches.length);
+      const results = matches.map(m => m.result);
+      incrementWinLoseCount(seasonId, rule, results);
+    } else {
+      incrementMatchCount(seasonId, rule, 1);
+      incrementWinLoseCount(seasonId, rule, [matches[0].result]);
+    }
+
+    if (matches[matches.length - 1].xp !== "") {
+      const key = `xpSubmitted_${seasonId}_${rule}`;
+      localStorage.setItem(key, "true");
+      setXPFlag(seasonId, rule);
+    }
+
+    document.getElementById("postSubmitOptions").style.display = "block";
+  } else {
+    msg.style.color = "red";
+    msg.textContent = "一部の戦績登録に失敗しました";
+  }
+});
+
+document.getElementById("goToMyPage").addEventListener("click", () => {
+  window.location.href = "mypage.html";
+});
+
+document.getElementById("addAnother").addEventListener("click", () => {
+  document.getElementById("matchForm").reset();
+  document.getElementById("matchMessage").textContent = "";
+  document.getElementById("postSubmitOptions").style.display = "none";
+  xpInput.style.display = "none";
+  updateMatchInputs();
+});
+
+// 初期化処理
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const sidebarRes = await fetch("sidebar.html");
+    const sidebarHtml = await sidebarRes.text();
+    document.getElementById("sidebar-container").innerHTML = sidebarHtml;
+  } catch (e) {
+    console.error("サイドバーの読み込みに失敗しました:", e);
+  }
+
+  weaponList = await fetchList("getWeaponList");
+  stageList = await fetchList("getStageList");
+
+  const seasonId = await fetchSeasonId();
+  checkSeasonChange(seasonId);
+  localStorage.setItem("currentSeasonId", seasonId);
+
+  updateMatchInputs();
+});

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>管理者ページ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <script src="common.js"></script> <!-- ✅ ログイン・権限チェック用 -->
+</head>
+<body onload="requireLogin(); showUserInfo(); checkAdminAccess();">
+  <div class="sidebar">
+    <a href="mypage.html">🏠 マイページ</a>
+    <a href="entry.html">📝 戦績登録</a>
+    <a href="ranking.html">📊 ランキング</a>
+    <a href="admin.html">🛠 管理者ページ</a>
+    <a href="#" onclick="logout()">🚪 ログアウト</a>
+  </div>
+
+  <!-- 管理者・モデレーター用の本体 -->
+  <div class="main" id="adminContent" style="display:none;">
+    <h2>管理者ページ</h2>
+    <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
+
+    <section>
+      <h2>通報一覧</h2>
+      <div id="reportList"></div>
+    </section>
+
+    <section>
+      <h2>ユーザー一覧</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>プレイヤー名</th>
+            <th>ユーザーID</th>
+            <th>BAN</th>
+            <th>モデレーター</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="userListBody"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <!-- 権限なしユーザー用の表示 -->
+  <div class="main" id="noAccess" style="display:none;">
+    <h2>権限がありません</h2>
+    <p>このページは管理者またはモデレーターのみアクセスできます。</p>
+    <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
+  </div>
+
+
+  <script>
+    const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
+
+    async function loadUsers() {
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "getUserList" })
+        });
+
+        const result = await res.json();
+        const users = result.users;
+        const container = document.getElementById("userListBody");
+        container.innerHTML = "";
+
+        if (!Array.isArray(users)) {
+          container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+          return;
+        }
+
+        const isAdmin = localStorage.getItem("isAdmin") === "true";
+        const isModerator = localStorage.getItem("isModerator") === "true";
+
+        users.forEach(user => {
+          const tr = document.createElement("tr");
+          const isBanned = user.IsBanned === "TRUE";
+          const isMod = user.isModerator === "TRUE";
+
+          let buttons = "";
+
+          if (isAdmin) {
+            buttons += `
+              <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
+                ${isBanned ? '解除' : 'BAN'}
+              </button>
+              <button onclick="toggleMod('${user.UserID}', ${!isMod})">
+                ${isMod ? '解除' : 'モデレーターにする'}
+              </button>
+            `;
+          } else if (isModerator && isBanned) {
+            buttons += `
+              <button onclick="toggleBan('${user.UserID}', false)">
+                解除
+              </button>
+            `;
+          }
+
+          tr.innerHTML = `
+            <td>${user.PlayerName}</td>
+            <td>${user.UserID}</td>
+            <td>${user.IsBanned}</td>
+            <td>${user.isModerator}</td>
+            <td>${buttons}</td>
+          `;
+          container.appendChild(tr);
+        });
+      } catch (e) {
+        const container = document.getElementById("userListBody");
+        container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+      }
+    }
+
+    async function toggleBan(userId, newStatus) {
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "banUser", userId, isBanned: newStatus })
+        });
+        loadUsers();
+      } catch (e) {
+        console.error("BAN切り替えエラー:", e);
+      }
+    }
+
+    async function toggleMod(userId, newStatus) {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      if (!isAdmin) {
+        alert("モデレーター設定は管理者のみ可能です。");
+        return;
+      }
+
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "setModerator", userId, isModerator: newStatus })
+        });
+        loadUsers();
+      } catch (e) {
+        console.error("モデレーター切り替えエラー:", e);
+      }
+    }
+
+    async function loadReports() {
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "getReports" })
+        });
+
+        const result = await res.json();
+        const reports = result.reports;
+        const container = document.getElementById("reportList");
+        container.innerHTML = "";
+
+        if (!Array.isArray(reports)) {
+          container.textContent = "通報情報の取得に失敗しました。";
+          return;
+        }
+
+        reports.forEach(report => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${report.reporterId}</strong> → <strong>${report.targetId}</strong><br>
+            理由: ${report.reason}<br>
+            日時: ${report.timestamp}<br>
+            状態: ${report.status}<br>
+            <textarea id="note-${report.reportId}" placeholder="対応メモ"></textarea>
+            <button onclick="handleReport('${report.reportId}')">対応済みにする</button>
+            <hr>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        document.getElementById("reportList").textContent = "通報情報の取得に失敗しました。";
+      }
+    }
+    function checkAdminAccess() {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const isModerator = localStorage.getItem("isModerator") === "true";
+  
+      if (isAdmin || isModerator) {
+        document.getElementById("adminContent").style.display = "block";
+      } else {
+        document.getElementById("noAccess").style.display = "block";
+      }
+    }
+
+    async function handleReport(reportId) {
+      const note = document.getElementById(`note-${reportId}`).value;
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "markReportHandled", reportId, note })
+        });
+        loadReports();
+      } catch (e) {
+        console.error("通報処理エラー:", e);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadUsers();
+      loadReports();
+    });
+    
+  </script>
+</body>
+</html>

@@ -406,6 +406,7 @@ function renderRankingTables() {
 
     const sorted = [...data].sort(sortBy(sortKey, sortAsc));
     sorted.forEach((p, i) => {
+      console.log("👤 プレイヤーデータ:", p);
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td data-label="順位">${i + 1}</td>

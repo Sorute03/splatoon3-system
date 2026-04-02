@@ -22,21 +22,31 @@
           token: "super-secret-token-123"
         })
       });
-
+    
       const result = await res.json();
+    
+      // 🔍 ログ追加ここから！
       secureLog("🔍 userId to match:", userId);
-      secureLog("📋 user list:", result.users.map(u => u.userId));
-      secureLog("📋 user list:", result.users.map(u => ({
+      secureLog("📦 result.users (raw):", result.users); // ← 追加！
+      secureLog("📋 user list:", result.users.filter(Boolean).map(u => ({
         userId: String(u.userId),
         playerName: u.playerName
       })));
-
+      // 🔍 ログ追加ここまで！
+    
       if (Array.isArray(result.users)) {
-        const user = result.users.find(u => String(u.userId) == String(userId));
+        const user = result.users.find(u =>
+          String(u.userId).trim() === String(userId).trim()
+        );
+    
+        secureLog("🎯 一致したユーザー:", user);
+    
         return user?.playerName || "(不明なプレイヤー)";
       }
+    
       return "(不明なプレイヤー)";
     }
+
 
     // 初期化
     async function initMypage() {

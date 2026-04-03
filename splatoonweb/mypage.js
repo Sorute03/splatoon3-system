@@ -1,17 +1,21 @@
-// API_URL は common.js で定義されている前提
 const currentUserId = localStorage.getItem("userId");
+const token = localStorage.getItem("token");
+let allMatches = [];
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const viewedUserId = urlParams.get("user") || currentUserId;
 
   // 他人のページなら通報ボタンを表示
   if (viewedUserId !== currentUserId) {
     const reportArea = document.getElementById("reportArea");
-    reportArea.innerHTML = `
-      <button onclick="openReport('${viewedUserId}', 'このプレイヤー')">🚨 通報</button>
-    `;
-    document.getElementById("passwordSection").style.display = "none";
+    if (reportArea) {
+      reportArea.innerHTML = `
+        <button onclick="openReport('${viewedUserId}', 'このプレイヤー')">🚨 通報</button>
+      `;
+    }
+    const pwSection = document.getElementById("passwordSection");
+    if (pwSection) pwSection.style.display = "none";
   }
 
   // 通報モーダルのイベント設定
@@ -60,6 +64,20 @@ document.addEventListener("DOMContentLoaded", () => {
       status.textContent = "通信エラー：" + e.message;
     }
   };
+
+  showUserInfo();
+
+  // 戦績取得＆グラフ描画
+  allMatches = await fetchBattleHistory(viewedUserId);
+  populateFilters(allMatches);
+  renderWinRateChart(allMatches);
+  renderKDChart(allMatches);
+
+  document.getElementById("applyFilters").addEventListener("click", () => {
+    const filtered = applyFilters(allMatches);
+    renderWinRateChart(filtered);
+    renderKDChart(filtered);
+  });
 });
 
 function showUserInfo() {
@@ -72,7 +90,8 @@ function showUserInfo() {
   const viewedUserId = urlParams.get("user") || userId;
 
   document.getElementById("userIdDisplay").textContent = viewedUserId;
-  document.getElementById("secretIdDisplay").textContent = viewedUserId === userId ? (secretId || "(未登録)") : "非公開";
+  document.getElementById("secretIdDisplay").textContent =
+    viewedUserId === userId ? (secretId || "(未登録)") : "非公開";
 
   if (viewedUserId === userId) {
     document.getElementById("mypageName").textContent = name || "プレイヤー";
@@ -94,4 +113,110 @@ function openReport(userId, name) {
   document.getElementById("reportEvidence").value = "";
   document.getElementById("reportStatus").textContent = "";
   document.getElementById("reportModal").style.display = "flex";
+}
+
+// 戦績取得
+async function fetchBattleHistory(userId) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getUserBattleHistory",
+      token,
+      userId
+    })
+  });
+  return await res.json();
+}
+
+// フィルターUIを構築
+function populateFilters(data) {
+  const ruleSet = new Set();
+  const weaponSet = new Set();
+
+  data.forEach(m => {
+    if (m.rule) ruleSet.add(m.rule);
+    if (m.weapon) weaponSet.add(m.weapon);
+  });
+
+  const ruleFilter = document.getElementById("ruleFilter");
+  ruleSet.forEach(rule => {
+    const opt = document.createElement("option");
+    opt.value = rule;
+    opt.textContent = rule;
+    ruleFilter.appendChild(opt);
+  });
+
+  const weaponFilter = document.getElementById("weaponFilter");
+  weaponSet.forEach(weapon => {
+    const opt = document.createElement("option");
+    opt.value = weapon;
+    opt.textContent = weapon;
+    weaponFilter.appendChild(opt);
+  });
+}
+
+// フィルター適用
+function applyFilters(data) {
+  const rule = document.getElementById("ruleFilter").value;
+  const weapon = document.getElementById("weaponFilter").value;
+
+  return data.filter(m => {
+    const ruleMatch = rule === "ALL" || m.rule === rule;
+    const weaponMatch = weapon === "ALL" || m.weapon === weapon;
+    return ruleMatch && weaponMatch;
+  });
+}
+
+// 勝率グラフ描画
+function renderWinRateChart(data) {
+  const ctx = document.getElementById("winRateChart").getContext("2d");
+  const labels = data.map(m => m.date);
+  const results = data.map(m => m.result === "win" ? 1 : 0);
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "勝敗（1=勝ち, 0=負け）",
+        data: results,
+        borderColor: "#1e90ff",
+        fill: false
+      }]
+    },
+    options: {
+      scales: {
+        y: { min: 0, max: 1 }
+      }
+    }
+  });
+}
+
+// K/D比グラフ描画
+function renderKDChart(data) {
+  const ctx = document.getElementById("kdChart").getContext("2d");
+  const labels = data.map(m => m.date);
+  const kd = data.map(m => {
+    const k = Number(m.kills || 0);
+    const d = Number(m.deaths || 0);
+    return d === 0 ? k : (k / d).toFixed(2);
+  });
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "K/D比",
+        data: kd,
+        backgroundColor: "#ffa500"
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
 }

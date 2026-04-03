@@ -4,16 +4,78 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スプラトゥーン戦績サイト</title>
-  <!-- 他のページと同じCSSを読み込む -->
   <link rel="stylesheet" href="splatoonweb/style.css" />
+  <style>
+    body {
+      font-family: "Helvetica Neue", sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .site-description {
+      background-color: #ffffff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin: 2rem 0;
+      text-align: left;
+    }
+    .site-description h2 {
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    .site-description p {
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .button-group {
+      margin-top: 2rem;
+    }
+    .button {
+      display: inline-block;
+      padding: 0.8em 1.5em;
+      margin: 0.5em;
+      background-color: #1e90ff;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #0f6fc6;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>🎮 スプラトゥーン戦績サイトへようこそ！</h1>
-    <p>ようこそ！以下から始めよう！</p>
+
+    <section class="site-description">
+      <h2>このサイトについて</h2>
+      <p>
+        このサイトは、スプラトゥーンのバトルデータを記録・分析できる非公式の戦績管理ツールです。  
+        自分の戦績を確認したり、他のプレイヤーとランキングで競い合ったり、使用武器の傾向をチェックしたりできます！
+      </p>
+      <p>
+        登録してマイページを作成すれば、自分のバトル履歴や勝率、キルデス比などをグラフで確認できます。  
+        スプラトゥーンをもっと楽しみたいあなたにぴったりのツールです！🎯
+      </p>
+    </section>
+
     <div class="button-group">
       <a class="button" href="splatoonweb/register.html">新規登録</a>
-      <a class="button" href="splatoonweb/index.html">ログイン</a>
+      <a class="button" href="splatoonweb/index.html">マイページへ</a>
     </div>
   </div>
 </body>

@@ -1,12 +1,14 @@
 const currentUserId = localStorage.getItem("userId");
 const token = localStorage.getItem("token");
 let allMatches = [];
+let winChart = null;
+let kdChart = null;
+let currentChart = "winRate";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const viewedUserId = urlParams.get("user") || currentUserId;
 
-  // 他人のページなら通報ボタンを表示
   if (viewedUserId !== currentUserId) {
     const reportArea = document.getElementById("reportArea");
     if (reportArea) {
@@ -18,7 +20,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (pwSection) pwSection.style.display = "none";
   }
 
-  // 通報モーダルのイベント設定
   document.getElementById("closeReportModal").onclick = () => {
     document.getElementById("reportModal").style.display = "none";
   };
@@ -67,17 +68,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   showUserInfo();
 
-  // 戦績取得＆グラフ描画
   allMatches = await fetchBattleHistory(viewedUserId);
   populateFilters(allMatches);
-  renderWinRateChart(allMatches);
-  renderKDChart(allMatches);
+  updateCharts(allMatches);
 
   document.getElementById("applyFilters").addEventListener("click", () => {
     const filtered = applyFilters(allMatches);
-    renderWinRateChart(filtered);
-    renderKDChart(filtered);
+    updateCharts(filtered);
   });
+
+  const toggleBtn = document.getElementById("toggleChartBtn");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      currentChart = currentChart === "winRate" ? "kd" : "winRate";
+      document.getElementById("winRateChart").style.display = currentChart === "winRate" ? "block" : "none";
+      document.getElementById("kdChart").style.display = currentChart === "kd" ? "block" : "none";
+    });
+  }
 });
 
 function showUserInfo() {
@@ -93,20 +100,15 @@ function showUserInfo() {
   document.getElementById("secretIdDisplay").textContent =
     viewedUserId === userId ? (secretId || "(未登録)") : "非公開";
 
-  if (viewedUserId === userId) {
-    document.getElementById("mypageName").textContent = name || "プレイヤー";
-    document.getElementById("welcomeMessage").textContent = `ようこそ、${name || "プレイヤー"} さん！`;
-  } else {
-    document.getElementById("mypageName").textContent = viewedUserId;
-    document.getElementById("welcomeMessage").textContent = `${viewedUserId} さんのページ`;
-  }
+  document.getElementById("mypageName").textContent = viewedUserId === userId ? (name || "プレイヤー") : viewedUserId;
+  document.getElementById("welcomeMessage").textContent =
+    viewedUserId === userId ? `ようこそ、${name || "プレイヤー"} さん！` : `${viewedUserId} さんのページ`;
 
   if (isAdmin) {
     document.getElementById("adminLink").style.display = "block";
   }
 }
 
-// 通報モーダルを開く関数
 function openReport(userId, name) {
   document.getElementById("reportTarget").textContent = `通報対象: ${name} (${userId})`;
   document.getElementById("reportReason").value = "";
@@ -115,7 +117,6 @@ function openReport(userId, name) {
   document.getElementById("reportModal").style.display = "flex";
 }
 
-// 戦績取得
 async function fetchBattleHistory(userId) {
   const res = await fetch(API_URL, {
     method: "POST",
@@ -129,7 +130,6 @@ async function fetchBattleHistory(userId) {
   return await res.json();
 }
 
-// フィルターUIを構築
 function populateFilters(data) {
   const ruleSet = new Set();
   const weaponSet = new Set();
@@ -140,6 +140,11 @@ function populateFilters(data) {
   });
 
   const ruleFilter = document.getElementById("ruleFilter");
+  const weaponFilter = document.getElementById("weaponFilter");
+
+  ruleFilter.innerHTML = '<option value="ALL">すべて</option>';
+  weaponFilter.innerHTML = '<option value="ALL">すべて</option>';
+
   ruleSet.forEach(rule => {
     const opt = document.createElement("option");
     opt.value = rule;
@@ -147,7 +152,6 @@ function populateFilters(data) {
     ruleFilter.appendChild(opt);
   });
 
-  const weaponFilter = document.getElementById("weaponFilter");
   weaponSet.forEach(weapon => {
     const opt = document.createElement("option");
     opt.value = weapon;
@@ -156,7 +160,6 @@ function populateFilters(data) {
   });
 }
 
-// フィルター適用
 function applyFilters(data) {
   const rule = document.getElementById("ruleFilter").value;
   const weapon = document.getElementById("weaponFilter").value;
@@ -168,13 +171,21 @@ function applyFilters(data) {
   });
 }
 
-// 勝率グラフ描画
+function updateCharts(data) {
+  updateAverageStats(data);
+  renderBattleTable(data);
+  renderWinRateChart(data);
+  renderKDChart(data);
+}
+
 function renderWinRateChart(data) {
   const ctx = document.getElementById("winRateChart").getContext("2d");
+  if (winChart) winChart.destroy();
+
   const labels = data.map(m => m.date);
   const results = data.map(m => m.result === "win" ? 1 : 0);
 
-  new Chart(ctx, {
+  winChart = new Chart(ctx, {
     type: "line",
     data: {
       labels,
@@ -193,9 +204,10 @@ function renderWinRateChart(data) {
   });
 }
 
-// K/D比グラフ描画
 function renderKDChart(data) {
   const ctx = document.getElementById("kdChart").getContext("2d");
+  if (kdChart) kdChart.destroy();
+
   const labels = data.map(m => m.date);
   const kd = data.map(m => {
     const k = Number(m.kills || 0);
@@ -203,7 +215,7 @@ function renderKDChart(data) {
     return d === 0 ? k : (k / d).toFixed(2);
   });
 
-  new Chart(ctx, {
+  kdChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels,
@@ -218,5 +230,37 @@ function renderKDChart(data) {
         y: { beginAtZero: true }
       }
     }
+  });
+}
+
+function updateAverageStats(data) {
+  const total = data.length;
+  const wins = data.filter(m => m.result === "win").length;
+  const kills = data.reduce((sum, m) => sum + Number(m.kills || 0), 0);
+  const deaths = data.reduce((sum, m) => sum + Number(m.deaths || 0), 0);
+  const avgKills = total ? (kills / total).toFixed(2) : "0.00";
+  const avgDeaths = total ? (deaths / total).toFixed(2) : "0.00";
+  const kd = avgDeaths === "0.00" ? (avgKills > 0 ? "∞" : "0") : (avgKills / avgDeaths).toFixed(2);
+  const winRate = total ? ((wins / total) * 100).toFixed(1) : "0.0";
+
+  document.getElementById("averageStats").textContent =
+    `試合数: ${total}｜勝率: ${winRate}%｜平均K: ${avgKills}｜平均D: ${avgDeaths}｜K/D: ${kd}`;
+}
+
+function renderBattleTable(data) {
+  const tbody = document.querySelector("#battleTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(m => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${m.date || ""}</td>
+      <td>${m.rule || ""}</td>
+      <td>${m.weapon || ""}</td>
+      <td>${m.kills ?? "-"}</td>
+      <td>${m.deaths ?? "-"}</td>
+      <td>${m.result === "win" ? "勝ち" : "負け"}</td>
+    `;
+    tbody.appendChild(tr);
   });
 }

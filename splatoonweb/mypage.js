@@ -269,7 +269,7 @@ function updateCharts(data) {
 }
 
 function renderWinRateChart(data) {
-  consoleLog.log("📅 ラベル一覧:", data.map(m => m.date));
+  console.log("📅 ラベル一覧:", data.map(m => m.date));
   const ctx = document.getElementById("winRateChart").getContext("2d");
   if (winChart) winChart.destroy();
 

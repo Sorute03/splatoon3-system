@@ -171,8 +171,16 @@ async function fetchBattleHistory(userId) {
       userId
     })
   });
-  return await res.json();
+
+  const result = await res.json();
+  if (Array.isArray(result)) {
+    return result;
+  } else {
+    console.warn("⚠️ 戦績データが配列ではありません:", result);
+    return [];
+  }
 }
+
 
 async function fetchUserSettings(userId) {
   const res = await fetch(API_URL, {
@@ -203,6 +211,8 @@ async function saveUserSettings(userId, updates) {
 }
 
 function populateFilters(data) {
+  if (!Array.isArray(data)) return;
+
   const ruleSet = new Set();
   const weaponSet = new Set();
 
@@ -231,6 +241,7 @@ function populateFilters(data) {
     weaponFilter.appendChild(opt);
   });
 }
+
 
 function applyFilters(data) {
   const rule = document.getElementById("ruleFilter").value;

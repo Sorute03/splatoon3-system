@@ -162,24 +162,31 @@ function openReport(userId, name) {
 }
 
 async function fetchBattleHistory(userId) {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getUserBattleHistory",
-      token,
-      userId
-    })
-  });
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "getUserBattleHistory",
+        token,
+        userId
+      })
+    });
 
-  const result = await res.json();
-  if (Array.isArray(result)) {
-    return result;
-  } else {
-    console.warn("⚠️ 戦績データが配列ではありません:", result);
+    const result = await res.json();
+
+    if (Array.isArray(result)) {
+      return result;
+    } else {
+      console.warn("⚠️ 戦績データが配列ではありません:", result);
+      return [];
+    }
+  } catch (e) {
+    console.error("❌ fetchBattleHistory エラー:", e);
     return [];
   }
 }
+
 
 
 async function fetchUserSettings(userId) {

@@ -24,7 +24,6 @@ jobs:
           include-html: true
           include-pdf: false
 
-
       - name: Commit and Push Sitemap
         run: |
           if [[ `git status --porcelain sitemap.xml` ]]; then

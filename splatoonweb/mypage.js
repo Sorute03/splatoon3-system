@@ -8,8 +8,10 @@ let currentChart = "winRate";
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const viewedUserId = urlParams.get("user") || currentUserId;
+  const isOwnPage = viewedUserId === currentUserId;
 
-  if (viewedUserId !== currentUserId) {
+  // 通報UI
+  if (!isOwnPage) {
     const reportArea = document.getElementById("reportArea");
     if (reportArea) {
       reportArea.innerHTML = `
@@ -68,6 +70,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   showUserInfo();
 
+  // 公開設定の取得
+  const settings = await fetchUserSettings(viewedUserId);
+  const isPublic = settings.isPublic === true;
+
+  // 自分のページなら公開設定UIを表示
+  if (isOwnPage) {
+    const section = document.getElementById("publicSettingSection");
+    const toggle = document.getElementById("publicToggle");
+    const status = document.getElementById("publicStatus");
+
+    if (section && toggle) {
+      section.style.display = "block";
+      toggle.checked = isPublic;
+
+      toggle.addEventListener("change", async () => {
+        const newValue = toggle.checked;
+        const res = await saveUserSettings(currentUserId, { isPublic: newValue });
+        if (res.status === "ok") {
+          status.style.color = "green";
+          status.textContent = "公開設定を更新しました";
+        } else {
+          status.style.color = "red";
+          status.textContent = res.error || "更新に失敗しました";
+        }
+      });
+    }
+  }
+
+  // 他人のページで非公開なら戦績を隠す
+  if (!isOwnPage && !isPublic) {
+    document.getElementById("privateNotice").style.display = "block";
+    document.getElementById("chartContainer").style.display = "none";
+    document.getElementById("averageStats").style.display = "none";
+    document.getElementById("battleTable").style.display = "none";
+    document.getElementById("toggleChartBtn").style.display = "none";
+    document.getElementById("ruleFilter").disabled = true;
+    document.getElementById("weaponFilter").disabled = true;
+    document.getElementById("applyFilters").disabled = true;
+    return;
+  }
+
+  // 戦績取得＆表示
   allMatches = await fetchBattleHistory(viewedUserId);
   populateFilters(allMatches);
   updateCharts(allMatches);
@@ -130,6 +174,34 @@ async function fetchBattleHistory(userId) {
   return await res.json();
 }
 
+async function fetchUserSettings(userId) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "getUserSettings",
+      token,
+      userId
+    })
+  });
+  return await res.json();
+}
+
+async function saveUserSettings(userId, updates) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "setUserSettings",
+      token,
+      userId,
+      requesterId: currentUserId,
+      updates
+    })
+  });
+  return await res.json();
+}
+
 function populateFilters(data) {
   const ruleSet = new Set();
   const weaponSet = new Set();
@@ -167,7 +239,7 @@ function applyFilters(data) {
   return data.filter(m => {
     const ruleMatch = rule === "ALL" || m.rule === rule;
     const weaponMatch = weapon === "ALL" || m.weapon === weapon;
-    return ruleMatch && weaponMatch;
+    return ruleMatch&& weaponMatch;
   });
 }
 

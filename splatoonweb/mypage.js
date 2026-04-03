@@ -176,6 +176,19 @@ async function fetchBattleHistory(userId) {
     const result = await res.json();
 
     if (Array.isArray(result)) {
+      result.forEach(m => {
+        const raw = m.Timestamp || m.timestamp || m.date;
+        if (raw) {
+          const d = new Date(raw);
+          if (!isNaN(d)) {
+            m.date = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+          } else {
+            m.date = "不明";
+          }
+        } else {
+          m.date = "不明";
+        }
+      });
       return result;
     } else {
       console.warn("⚠️ 戦績データが配列ではありません:", result);
@@ -186,6 +199,7 @@ async function fetchBattleHistory(userId) {
     return [];
   }
 }
+
 
 
 

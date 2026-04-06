@@ -4,54 +4,101 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スプラトゥーン戦績サイト</title>
+
+  <!-- Splatoon風デザインを読み込む -->
   <link rel="stylesheet" href="splatoonweb/style.css" />
+
   <style>
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+    /* トップページ専用レイアウト調整 */
+
+    .top-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
     }
 
-    /* ← ここが重要：文字色を濃いグレーに固定 */
+    .top-title {
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      color: var(--ink-yellow);
+      text-shadow: 3px 3px 0 var(--ink-black);
+    }
+
     .site-description {
-      background-color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
       padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
       margin: 2rem 0;
       text-align: left;
-      color: #333; /* ← 追加：文字色を明確に指定 */
+      color: var(--ink-white);
+      backdrop-filter: blur(4px);
     }
 
     .site-description h2 {
-      color: #333;
+      color: var(--ink-blue);
       margin-bottom: 1rem;
+      text-shadow: 2px 2px 0 var(--ink-black);
     }
 
     .site-description p {
-      line-height: 1.6;
+      line-height: 1.7;
       margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .button-group {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .top-button {
+      background-color: var(--ink-pink);
+      color: var(--ink-white);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px #000;
+      transition: 0.2s;
+    }
+
+    .top-button:hover {
+      background-color: var(--ink-yellow);
+      color: var(--ink-black);
+      transform: scale(1.05);
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>🎮 スプラトゥーン戦績サイトへようこそ！</h1>
+  <div class="main">
+    <div class="top-container">
 
-    <section class="site-description">
-      <h2>このサイトについて</h2>
-      <p>
-        このサイトは、スプラトゥーンのバトルデータを記録・分析できる非公式の戦績管理ツールです。  
-        自分の戦績を確認したり、他のプレイヤーとランキングで競い合ったり、使用武器の傾向をチェックしたりできます！
-      </p>
-      <p>
-        登録してマイページを作成すれば、自分のバトル履歴や勝率、キルデス比などをグラフで確認できます。  
-        スプラトゥーンをもっと楽しみたいあなたにぴったりのツールです！🎯
-      </p>
-    </section>
+      <h1 class="top-title">🎮 スプラトゥーン戦績サイトへようこそ！</h1>
 
-    <div class="button-group">
-      <a class="button" href="splatoonweb/register.html">新規登録</a>
-      <a class="button" href="splatoonweb/index.html">マイページへ</a>
+      <section class="site-description">
+        <h2>このサイトについて</h2>
+        <p>
+          このサイトは、スプラトゥーンのバトルデータを記録・分析できる非公式の戦績管理ツールです。  
+          自分の戦績を確認したり、他のプレイヤーとランキングで競い合ったり、使用武器の傾向をチェックしたりできます！
+        </p>
+        <p>
+          登録してマイページを作成すれば、自分のバトル履歴や勝率、キルデス比などをグラフで確認できます。  
+          スプラトゥーンをもっと楽しみたいあなたにぴったりのツールです！🎯
+        </p>
+      </section>
+
+      <div class="button-group">
+        <a class="top-button" href="splatoonweb/register.html">新規登録</a>
+        <a class="top-button" href="splatoonweb/index.html">マイページへ</a>
+      </div>
+
     </div>
   </div>
 </body>

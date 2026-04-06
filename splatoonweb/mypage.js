@@ -167,7 +167,7 @@ async function fetchBattleHistory(userId) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "getUserBattleHistory",
+        mode: "getUserBattleHistory", // ← ここを action → mode に変更！
         token,
         userId
       })
@@ -199,6 +199,7 @@ async function fetchBattleHistory(userId) {
     return [];
   }
 }
+
 
 
 

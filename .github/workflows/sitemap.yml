@@ -20,18 +20,16 @@ jobs:
         uses: cicirello/generate-sitemap@v1
         with:
           sitemap-format: xml
-          base-url-path: http://spl3vrmh.dpdns.org/
+          base-url-path: http://spl3vrmh.dpdns.org
           include-html: true
           include-pdf: false
 
       - name: Commit and Push Sitemap
         run: |
-          if [[ `git status --porcelain sitemap.xml` ]]; then
+          if ! git diff --quiet sitemap.xml; then
             git config --global user.name 'github-actions'
             git config --global user.email 'github-actions@github.com'
             git add sitemap.xml
             git commit -m "Automated sitemap update"
             git push
           fi
-
-

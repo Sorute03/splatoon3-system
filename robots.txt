@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: http://spl3vrmh.dpdns.org/sitemap.xml

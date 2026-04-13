@@ -87,10 +87,10 @@
         users.forEach(user => {
           const tr = document.createElement("tr");
 
-          // ★ GAS の返却形式に完全対応
+          // ★ Users シートのヘッダーに完全対応
           const playerName = user.playerName || "(名前なし)";
           const userId = user.userId || "(ID不明)";
-          const isBanned = user.isBanned === true || user.isBanned === "TRUE";
+          const isBanned = user.IsBanned === true || user.IsBanned === "TRUE";
           const isMod = user.isModerator === true || user.isModerator === "TRUE";
 
           let buttons = "";

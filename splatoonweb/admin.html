@@ -17,7 +17,6 @@
     <a href="#" onclick="logout()">🚪 ログアウト</a>
   </div>
 
-  <!-- 管理者・モデレーター用 -->
   <div class="main" id="adminContent" style="display:none;">
     <h2>管理者ページ</h2>
     <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
@@ -44,7 +43,6 @@
     </section>
   </div>
 
-  <!-- 権限なし -->
   <div class="main" id="noAccess" style="display:none;">
     <h2>権限がありません</h2>
     <p>このページは管理者またはモデレーターのみアクセスできます。</p>
@@ -54,9 +52,6 @@
   <script>
     const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
-    /* -------------------------
-       権限チェック
-    ------------------------- */
     function checkAdminAccess() {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       const isModerator = localStorage.getItem("isModerator") === "true";
@@ -68,9 +63,6 @@
       }
     }
 
-    /* -------------------------
-       ユーザー一覧取得
-    ------------------------- */
     async function loadUsers() {
       try {
         const res = await fetch(API_URL, {
@@ -95,32 +87,26 @@
         users.forEach(user => {
           const tr = document.createElement("tr");
 
-          // ★ どのフィールドでも拾えるようにする
-          const playerName =
-            user.PlayerName ||
-            user.playerName ||
-            user.displayName ||
-            user.name ||
-            user.username ||
-            "(名前なし)";
-
-          const isBanned = user.IsBanned === "TRUE";
-          const isMod = user.isModerator === "TRUE";
+          // ★ GAS の返却形式に完全対応
+          const playerName = user.playerName || "(名前なし)";
+          const userId = user.userId || "(ID不明)";
+          const isBanned = user.isBanned === true || user.isBanned === "TRUE";
+          const isMod = user.isModerator === true || user.isModerator === "TRUE";
 
           let buttons = "";
 
           if (isAdmin) {
             buttons += `
-              <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
+              <button onclick="toggleBan('${userId}', ${!isBanned})">
                 ${isBanned ? "解除" : "BAN"}
               </button>
-              <button onclick="toggleMod('${user.UserID}', ${!isMod})">
+              <button onclick="toggleMod('${userId}', ${!isMod})">
                 ${isMod ? "解除" : "モデレーターにする"}
               </button>
             `;
           } else if (isModerator && isBanned) {
             buttons += `
-              <button onclick="toggleBan('${user.UserID}', false)">
+              <button onclick="toggleBan('${userId}', false)">
                 解除
               </button>
             `;
@@ -128,9 +114,9 @@
 
           tr.innerHTML = `
             <td>${playerName}</td>
-            <td>${user.UserID}</td>
-            <td>${user.IsBanned}</td>
-            <td>${user.isModerator}</td>
+            <td>${userId}</td>
+            <td>${isBanned ? "TRUE" : "FALSE"}</td>
+            <td>${isMod ? "TRUE" : "FALSE"}</td>
             <td>${buttons}</td>
           `;
 
@@ -143,15 +129,15 @@
       }
     }
 
-    /* -------------------------
-       BAN 切り替え
-    ------------------------- */
     async function toggleBan(userId, newStatus) {
       try {
         await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "banUser", userId, isBanned: newStatus })
+          body: JSON.stringify({
+            mode: newStatus ? "banUser" : "unbanUser",
+            userId
+          })
         });
         loadUsers();
       } catch (e) {
@@ -159,9 +145,6 @@
       }
     }
 
-    /* -------------------------
-       モデレーター切り替え
-    ------------------------- */
     async function toggleMod(userId, newStatus) {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       if (!isAdmin) {
@@ -173,7 +156,11 @@
         await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mode: "setModerator", userId, isModerator: newStatus })
+          body: JSON.stringify({
+            mode: "setModerator",
+            userId,
+            isModerator: newStatus
+          })
         });
         loadUsers();
       } catch (e) {
@@ -181,9 +168,6 @@
       }
     }
 
-    /* -------------------------
-       通報一覧取得
-    ------------------------- */
     async function loadReports() {
       try {
         const res = await fetch(API_URL, {
@@ -222,9 +206,6 @@
       }
     }
 
-    /* -------------------------
-       通報処理
-    ------------------------- */
     async function handleReport(reportId) {
       const note = document.getElementById(`note-${reportId}`).value;
 
@@ -240,9 +221,6 @@
       }
     }
 
-    /* -------------------------
-       初期ロード
-    ------------------------- */
     document.addEventListener("DOMContentLoaded", () => {
       loadUsers();
       loadReports();

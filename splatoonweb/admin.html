@@ -5,8 +5,9 @@
   <title>管理者ページ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <script src="common.js"></script> <!-- ✅ ログイン・権限チェック用 -->
+  <script src="common.js"></script>
 </head>
+
 <body onload="requireLogin(); showUserInfo(); checkAdminAccess();">
   <div class="sidebar">
     <a href="mypage.html">🏠 マイページ</a>
@@ -16,7 +17,7 @@
     <a href="#" onclick="logout()">🚪 ログアウト</a>
   </div>
 
-  <!-- 管理者・モデレーター用の本体 -->
+  <!-- 管理者・モデレーター用 -->
   <div class="main" id="adminContent" style="display:none;">
     <h2>管理者ページ</h2>
     <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
@@ -43,17 +44,33 @@
     </section>
   </div>
 
-  <!-- 権限なしユーザー用の表示 -->
+  <!-- 権限なし -->
   <div class="main" id="noAccess" style="display:none;">
     <h2>権限がありません</h2>
     <p>このページは管理者またはモデレーターのみアクセスできます。</p>
     <button class="back-button" onclick="location.href='mypage.html'">← マイページに戻る</button>
   </div>
 
-
   <script>
     const API_URL = "https://sorute-api.haruto-mori0602.workers.dev/";
 
+    /* -------------------------
+       権限チェック
+    ------------------------- */
+    function checkAdminAccess() {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const isModerator = localStorage.getItem("isModerator") === "true";
+
+      if (isAdmin || isModerator) {
+        document.getElementById("adminContent").style.display = "block";
+      } else {
+        document.getElementById("noAccess").style.display = "block";
+      }
+    }
+
+    /* -------------------------
+       ユーザー一覧取得
+    ------------------------- */
     async function loadUsers() {
       try {
         const res = await fetch(API_URL, {
@@ -77,6 +94,16 @@
 
         users.forEach(user => {
           const tr = document.createElement("tr");
+
+          // ★ どのフィールドでも拾えるようにする
+          const playerName =
+            user.PlayerName ||
+            user.playerName ||
+            user.displayName ||
+            user.name ||
+            user.username ||
+            "(名前なし)";
+
           const isBanned = user.IsBanned === "TRUE";
           const isMod = user.isModerator === "TRUE";
 
@@ -85,10 +112,10 @@
           if (isAdmin) {
             buttons += `
               <button onclick="toggleBan('${user.UserID}', ${!isBanned})">
-                ${isBanned ? '解除' : 'BAN'}
+                ${isBanned ? "解除" : "BAN"}
               </button>
               <button onclick="toggleMod('${user.UserID}', ${!isMod})">
-                ${isMod ? '解除' : 'モデレーターにする'}
+                ${isMod ? "解除" : "モデレーターにする"}
               </button>
             `;
           } else if (isModerator && isBanned) {
@@ -100,20 +127,25 @@
           }
 
           tr.innerHTML = `
-            <td>${user.PlayerName}</td>
+            <td>${playerName}</td>
             <td>${user.UserID}</td>
             <td>${user.IsBanned}</td>
             <td>${user.isModerator}</td>
             <td>${buttons}</td>
           `;
+
           container.appendChild(tr);
         });
+
       } catch (e) {
-        const container = document.getElementById("userListBody");
-        container.innerHTML = "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
+        document.getElementById("userListBody").innerHTML =
+          "<tr><td colspan='5'>ユーザー情報の取得に失敗しました。</td></tr>";
       }
     }
 
+    /* -------------------------
+       BAN 切り替え
+    ------------------------- */
     async function toggleBan(userId, newStatus) {
       try {
         await fetch(API_URL, {
@@ -127,6 +159,9 @@
       }
     }
 
+    /* -------------------------
+       モデレーター切り替え
+    ------------------------- */
     async function toggleMod(userId, newStatus) {
       const isAdmin = localStorage.getItem("isAdmin") === "true";
       if (!isAdmin) {
@@ -146,6 +181,9 @@
       }
     }
 
+    /* -------------------------
+       通報一覧取得
+    ------------------------- */
     async function loadReports() {
       try {
         const res = await fetch(API_URL, {
@@ -177,23 +215,19 @@
           `;
           container.appendChild(div);
         });
+
       } catch (e) {
-        document.getElementById("reportList").textContent = "通報情報の取得に失敗しました。";
-      }
-    }
-    function checkAdminAccess() {
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      const isModerator = localStorage.getItem("isModerator") === "true";
-  
-      if (isAdmin || isModerator) {
-        document.getElementById("adminContent").style.display = "block";
-      } else {
-        document.getElementById("noAccess").style.display = "block";
+        document.getElementById("reportList").textContent =
+          "通報情報の取得に失敗しました。";
       }
     }
 
+    /* -------------------------
+       通報処理
+    ------------------------- */
     async function handleReport(reportId) {
       const note = document.getElementById(`note-${reportId}`).value;
+
       try {
         await fetch(API_URL, {
           method: "POST",
@@ -206,11 +240,13 @@
       }
     }
 
+    /* -------------------------
+       初期ロード
+    ------------------------- */
     document.addEventListener("DOMContentLoaded", () => {
       loadUsers();
       loadReports();
     });
-    
   </script>
 </body>
 </html>

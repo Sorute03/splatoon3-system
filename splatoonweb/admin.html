@@ -87,7 +87,7 @@
         users.forEach(user => {
           const tr = document.createElement("tr");
 
-          // ★ Users シートのヘッダーに完全対応
+          // ★ ランキングページと同じキー名を採用
           const playerName = user.playerName || "(名前なし)";
           const userId = user.userId || "(ID不明)";
           const isBanned = user.IsBanned === true || user.IsBanned === "TRUE";
